@@ -51,7 +51,7 @@ namespace KLOC
                     case "cs":     sourceFileEnumerable = new[] { path };              break;
                     case "csproj": sourceFileEnumerable = new ProjectFile(path, ctx);  break;
                     case "sln":    sourceFileEnumerable = new SolutionFile(path, ctx); break;
-                    default:       Usage("Unknown location.");                return;
+                    default:       Usage("Unknown location.");                         return;
                 }
             }
             else
@@ -68,8 +68,14 @@ namespace KLOC
             Console.WriteLine(new string('=', result.Length));
             Console.WriteLine("Projects:       " + ctx.Projects);
             Console.WriteLine("Source files:   " + sourceFiles.Length);
+            Console.WriteLine("Bytes length:   " + ctx.Bytes);
+            Console.WriteLine("Longest line:   " + ctx.LongestLine);
             Console.WriteLine("Count of lines: " + ctx.Lines);
             Console.WriteLine("Empty lines:    " + ctx.EmptyLines);
+            Console.WriteLine("File types:");
+            var sorted = ctx.FileTypes.OrderByDescending(x => x.Value);
+            foreach (var item in sorted)
+                Console.WriteLine("{0}:\t{1}", item.Key, item.Value);
         }
 
         private static void CountLines(string[] sourceFiles, CounterContext ctx)
@@ -79,6 +85,12 @@ namespace KLOC
         }
         private static void CountLines(string sourceFile, CounterContext ctx)
         {
+            var ext = Path.GetExtension(sourceFile).ToLowerInvariant();
+            if (!ctx.FileTypes.ContainsKey(ext))
+                ctx.FileTypes[ext] = 1;
+            else
+                ctx.FileTypes[ext]++;
+
             string line;
             using (var reader = new StreamReader(sourceFile))
             {
@@ -87,6 +99,8 @@ namespace KLOC
                     ctx.Lines++;
                     if (line.Trim().Length == 0)
                         ctx.EmptyLines++;
+                    if (line.Length > ctx.LongestLine)
+                        ctx.LongestLine = line.Length;
                 }
             }
         }
@@ -96,7 +110,10 @@ namespace KLOC
     {
         public int Projects { get; set; }
         public int Lines { get; set; }
+        public long Bytes { get; set; }
         public int EmptyLines { get; set; }
+        public int LongestLine { get; internal set; }
+        public Dictionary<string, int> FileTypes { get; } = new Dictionary<string, int>();
     }
 
     internal abstract class PathEnumerable : IEnumerable<string>
@@ -111,6 +128,8 @@ namespace KLOC
 
     internal class ProjectFile : PathEnumerable
     {
+        private string[] _relevantElementNames = new[] { "Compile", "Content", "EmbeddedResource" };
+
         private CounterContext _ctx;
         private string _projPath;
         public ProjectFile(string path, CounterContext ctx)
@@ -131,7 +150,7 @@ namespace KLOC
             var xml = XDocument.Load(_projPath);
             var fileNames = xml
                 .Descendants()
-                .Where(e => e.Name.LocalName == "Compile")
+                .Where(e => _relevantElementNames.Contains(e.Name.LocalName))
                 .Attributes("Include")
                 .Select(a => Path.Combine(dir, a.Value))
                 .ToArray();
