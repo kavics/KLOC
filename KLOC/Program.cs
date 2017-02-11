@@ -26,7 +26,7 @@ namespace KLOC
         public static void Main(string[] args)
         {
             Console.WriteLine("Kay-LOC");
-            Console.WriteLine("<? Line of code counter.");
+            Console.WriteLine("<? Kilo Lines Of Code.");
             Console.WriteLine();
 
             if (args.Length != 1)
