@@ -63,19 +63,23 @@ namespace KLOC
             var sourceFiles = sourceFileEnumerable.ToArray();
             CountLines(sourceFiles, ctx);
 
-            var result = "KLOC:           " + ctx.Lines / 1000;
+            var result = string.Format("KLOC:           {0:n0}", ctx.Lines / 1000);
             Console.WriteLine(result);
             Console.WriteLine(new string('=', result.Length));
-            Console.WriteLine("Projects:       " + ctx.Projects);
-            Console.WriteLine("Source files:   " + sourceFiles.Length);
-            Console.WriteLine("Bytes length:   " + ctx.Bytes);
-            Console.WriteLine("Longest line:   " + ctx.LongestLine);
-            Console.WriteLine("Count of lines: " + ctx.Lines);
-            Console.WriteLine("Empty lines:    " + ctx.EmptyLines);
+            Console.WriteLine();
+            Console.WriteLine("DETAILS");
+            Console.WriteLine("-------");
+            Console.WriteLine();
+            Console.WriteLine("Projects:       {0,15:n0}", ctx.Projects);
+            Console.WriteLine("Source files:   {0,15:n0}", sourceFiles.Length);
+            Console.WriteLine("Bytes length:   {0,15:n0}", ctx.Bytes);
+            Console.WriteLine("Longest line:   {0,15:n0}", ctx.LongestLine);
+            Console.WriteLine("Count of lines: {0,15:n0}", ctx.Lines);
+            Console.WriteLine("Empty lines:    {0,15:n0}", ctx.EmptyLines);
             Console.WriteLine("File types:");
             var sorted = ctx.FileTypes.OrderByDescending(x => x.Value);
             foreach (var item in sorted)
-                Console.WriteLine("{0}:\t{1}", item.Key, item.Value);
+                Console.WriteLine("{0,16}{1,15:n0}", item.Key, item.Value);
         }
 
         private static void CountLines(string[] sourceFiles, CounterContext ctx)
@@ -90,6 +94,9 @@ namespace KLOC
                 ctx.FileTypes[ext] = 1;
             else
                 ctx.FileTypes[ext]++;
+
+            var fileInfo = new FileInfo(sourceFile);
+            ctx.Bytes += fileInfo.Length;
 
             string line;
             using (var reader = new StreamReader(sourceFile))
@@ -128,7 +135,7 @@ namespace KLOC
 
     internal class ProjectFile : PathEnumerable
     {
-        private string[] _relevantElementNames = new[] { "Compile", "Content", "EmbeddedResource" };
+        private string[] _relevantElementNames = new[] { "Compile", "Content", "EmbeddedResource", "None" };
 
         private CounterContext _ctx;
         private string _projPath;
