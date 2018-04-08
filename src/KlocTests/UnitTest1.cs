@@ -29,8 +29,9 @@ namespace KlocTests
 
             KLOC.Program.Main(new string[0]);
 
+            var output = console.GetStringBuilder().ToString();
             string line;
-            using (var reader = new StringReader(console.GetStringBuilder().ToString()))
+            using (var reader = new StringReader(output))
             {
                 line = reader.ReadLine();
                 line = reader.ReadLine();
@@ -47,8 +48,9 @@ namespace KlocTests
 
             KLOC.Program.Main(new[] { "asdf" });
 
+            var output = console.GetStringBuilder().ToString();
             string line;
-            using (var reader = new StringReader(console.GetStringBuilder().ToString()))
+            using (var reader = new StringReader(output))
             {
                 line = reader.ReadLine();
                 line = reader.ReadLine();
@@ -64,7 +66,7 @@ namespace KlocTests
             var console = new StringWriter();
             Console.SetOut(console);
 
-            KLOC.Program.Main(new[] { @"D:\Projects\github\space-bender\KLOC\KLOC\Program.cs" });
+            KLOC.Program.Main(new[] { @"D:\Projects\github\kavics\KLOC\src\KLOC\Program.cs" });
 
             var output = console.GetStringBuilder().ToString();
             string line = null;
@@ -90,7 +92,7 @@ namespace KlocTests
             var console = new StringWriter();
             Console.SetOut(console);
 
-            KLOC.Program.Main(new[] { @"D:\Projects\github\space-bender\KLOC\KLOC\KLOC.csproj" });
+            KLOC.Program.Main(new[] { @"D:\Projects\github\kavics\KLOC\src\KLOC\KLOC.csproj" });
 
             var output = console.GetStringBuilder().ToString();
             string line = null;
@@ -116,7 +118,7 @@ namespace KlocTests
             var console = new StringWriter();
             Console.SetOut(console);
 
-            KLOC.Program.Main(new[] { @"D:\Projects\github\space-bender\KLOC\KLOC.sln" });
+            KLOC.Program.Main(new[] { @"D:\Projects\github\kavics\KLOC\src\KLOC.sln" });
 
             var output = console.GetStringBuilder().ToString();
             string line = null;
