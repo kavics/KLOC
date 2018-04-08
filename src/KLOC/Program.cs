@@ -51,7 +51,7 @@ namespace KLOC
 
             if (Directory.Exists(path))
             {
-                //UNDONE: get *.cs files recursively
+                sourceFileEnumerable = new ProjectDirectory(path, ctx);
             }
             else if (File.Exists(path))
             {

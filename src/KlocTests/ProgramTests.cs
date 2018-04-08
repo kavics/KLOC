@@ -146,14 +146,46 @@ namespace KlocTests
         [TestMethod]
         public void Directory_NonExistent()
         {
-            Assert.Inconclusive();
-            // D:\Projects\github\kavics\KLOC1
+            var console = new StringWriter();
+            Console.SetOut(console);
+
+            KLOC.Program.Main(new[] { @"D:\Projects\github\kavics\KLOC1" });
+
+            var output = console.GetStringBuilder().ToString();
+            string line;
+            using (var reader = new StringReader(output))
+            {
+                line = reader.ReadLine();
+                line = reader.ReadLine();
+                line = reader.ReadLine();
+                line = reader.ReadLine();
+            }
+            Assert.AreEqual("Location of source code files does not exist.", line);
         }
         [TestMethod]
         public void Directory_WithoutKnownFiles()
         {
-            Assert.Inconclusive();
-            // D:\Projects\github\kavics
+            var console = new StringWriter();
+            Console.SetOut(console);
+
+            KLOC.Program.Main(new[] { @"D:\Projects\github\kavics" });
+
+            var output = console.GetStringBuilder().ToString();
+            string line = null;
+            var hasLine = false;
+            using (var reader = new StringReader(output))
+            {
+                while ((line = reader.ReadLine()) != null)
+                {
+                    if (line.StartsWith("Projects:"))
+                    {
+                        hasLine = true;
+                        Assert.IsTrue(line.EndsWith(" 2"));
+                        break;
+                    }
+                }
+            }
+            Assert.IsTrue(hasLine);
         }
         [TestMethod]
         public void Directory_GithubRepository()
