@@ -51,6 +51,7 @@
     <Compile Include="ProjectFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SolutionFile.cs" />
+    <Compile Include="SourceFiles.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

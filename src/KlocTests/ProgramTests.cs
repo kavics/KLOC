@@ -187,20 +187,24 @@ namespace KlocTests
 
             var output = console.GetStringBuilder().ToString();
             string line = null;
-            var hasLine = false;
+            var lines = 0;
             using (var reader = new StringReader(output))
             {
                 while ((line = reader.ReadLine()) != null)
                 {
                     if (line.StartsWith("Projects:"))
                     {
-                        hasLine = true;
-                        Assert.IsTrue(line.EndsWith(" 2"));
-                        break;
+                        lines++;
+                        Assert.IsTrue(line.EndsWith(" 0"));
+                    }
+                    if (line.StartsWith("Source files:"))
+                    {
+                        lines++;
+                        Assert.IsTrue(line.EndsWith(" 0"));
                     }
                 }
             }
-            Assert.IsTrue(hasLine);
+            Assert.AreEqual(2, lines);
         }
         [TestMethod]
         public void Directory_GithubRepository()

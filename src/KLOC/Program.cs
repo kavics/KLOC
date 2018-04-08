@@ -41,7 +41,8 @@ namespace KLOC
             if (Debugger.IsAttached)
             {
                 Console.Write("-------- Press any key to exit --------");
-                Console.ReadKey();
+                if (!System.Reflection.Assembly.GetExecutingAssembly().Location.Contains(@"\KlocTests\"))
+                    Console.ReadKey();
             }
         }
         public static void Run(string path)
