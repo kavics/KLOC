@@ -76,11 +76,42 @@ namespace KlocTests
         }
 
         [TestMethod]
-        public void File_UnknownType()
+        public void File_UnknownType_markdown()
         {
-            Assert.Inconclusive();
-            // GetPath("README.md
-            // GetPath("src\KlocTests\bin\Debug\KlocTests.dll
+            var console = new StringWriter();
+            Console.SetOut(console);
+
+            KLOC.Program.Main(new[] { GetPath("README.md") });
+
+            var output = console.GetStringBuilder().ToString();
+            string line = null;
+            using (var reader = new StringReader(output))
+            {
+                line = reader.ReadLine();
+                line = reader.ReadLine();
+                line = reader.ReadLine();
+                line = reader.ReadLine();
+            }
+            Assert.AreEqual("Not a source file.", line);
+        }
+        [TestMethod]
+        public void File_UnknownType_dll()
+        {
+            var console = new StringWriter();
+            Console.SetOut(console);
+
+            KLOC.Program.Main(new[] { GetPath(@"src\KlocTests\bin\Debug\KlocTests.dll") });
+
+            var output = console.GetStringBuilder().ToString();
+            string line = null;
+            using (var reader = new StringReader(output))
+            {
+                line = reader.ReadLine();
+                line = reader.ReadLine();
+                line = reader.ReadLine();
+                line = reader.ReadLine();
+            }
+            Assert.AreEqual("Not a source file.", line);
         }
         [TestMethod]
         public void File_Csharp()
@@ -215,14 +246,52 @@ namespace KlocTests
         [TestMethod]
         public void Directory_WithKnownFiles_Sln()
         {
-            Assert.Inconclusive();
-            // GetPath("src")
+            var console = new StringWriter();
+            Console.SetOut(console);
+
+            KLOC.Program.Main(new[] { GetPath(@"src") });
+
+            var output = console.GetStringBuilder().ToString();
+            string line = null;
+            var hasLine = false;
+            using (var reader = new StringReader(output))
+            {
+                while ((line = reader.ReadLine()) != null)
+                {
+                    if (line.StartsWith("Projects:"))
+                    {
+                        hasLine = true;
+                        Assert.IsTrue(line.EndsWith(" 2"));
+                        break;
+                    }
+                }
+            }
+            Assert.IsTrue(hasLine);
         }
         [TestMethod]
         public void Directory_WithKnownFiles_Csproj()
         {
-            Assert.Inconclusive();
-            // GetPath("src")
+            var console = new StringWriter();
+            Console.SetOut(console);
+
+            KLOC.Program.Main(new[] { GetPath(@"src\KLOC") });
+
+            var output = console.GetStringBuilder().ToString();
+            string line = null;
+            var hasLine = false;
+            using (var reader = new StringReader(output))
+            {
+                while ((line = reader.ReadLine()) != null)
+                {
+                    if (line.StartsWith("Projects:"))
+                    {
+                        hasLine = true;
+                        Assert.IsTrue(line.EndsWith(" 1"));
+                        break;
+                    }
+                }
+            }
+            Assert.IsTrue(hasLine);
         }
         [TestMethod]
         public void Directory_WithKnownFiles_Cs()

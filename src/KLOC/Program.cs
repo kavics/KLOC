@@ -62,7 +62,7 @@ namespace KLOC
                     case "cs": sourceFileEnumerable = new[] { path }; break;
                     case "csproj": sourceFileEnumerable = new ProjectFile(path, ctx); break;
                     case "sln": sourceFileEnumerable = new SolutionFile(path, ctx); break;
-                    default: Usage("Unknown location."); return;
+                    default: Usage("Not a source file."); return;
                 }
             }
             else
