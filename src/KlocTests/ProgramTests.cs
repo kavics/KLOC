@@ -5,7 +5,7 @@ using System.IO;
 namespace KlocTests
 {
     [TestClass]
-    public class UnitTest1
+    public class ProgramTests
     {
         TextWriter _savedOutput;
         [TestInitialize]
@@ -22,7 +22,7 @@ namespace KlocTests
         }
 
         [TestMethod]
-        public void MissingParameter()
+        public void Parameter_Missing()
         {
             var console = new StringWriter();
             Console.SetOut(console);
@@ -41,7 +41,7 @@ namespace KlocTests
             Assert.AreEqual("Location of source code files is missing.", line);
         }
         [TestMethod]
-        public void WrongParameter()
+        public void Parameter_Wrong()
         {
             var console = new StringWriter();
             Console.SetOut(console);
@@ -61,7 +61,14 @@ namespace KlocTests
         }
 
         [TestMethod]
-        public void CsharpFile()
+        public void File_UnknownType()
+        {
+            Assert.Inconclusive();
+            // D:\Projects\github\kavics\KLOC\README.md
+            // D:\Projects\github\kavics\KLOC\src\KlocTests\bin\Debug\KlocTests.dll
+        }
+        [TestMethod]
+        public void File_Csharp()
         {
             var console = new StringWriter();
             Console.SetOut(console);
@@ -85,9 +92,8 @@ namespace KlocTests
             }
             Assert.IsTrue(hasLine);
         }
-
         [TestMethod]
-        public void ProjectFile()
+        public void File_Project()
         {
             var console = new StringWriter();
             Console.SetOut(console);
@@ -111,9 +117,8 @@ namespace KlocTests
             }
             Assert.IsTrue(hasLine);
         }
-
         [TestMethod]
-        public void SolutionFile()
+        public void File_Solution()
         {
             var console = new StringWriter();
             Console.SetOut(console);
@@ -138,5 +143,29 @@ namespace KlocTests
             Assert.IsTrue(hasLine);
         }
 
+        [TestMethod]
+        public void Directory_NonExistent()
+        {
+            Assert.Inconclusive();
+            // D:\Projects\github\kavics\KLOC1
+        }
+        [TestMethod]
+        public void Directory_WithoutKnownFiles()
+        {
+            Assert.Inconclusive();
+            // D:\Projects\github\kavics
+        }
+        [TestMethod]
+        public void Directory_GithubRepository()
+        {
+            Assert.Inconclusive();
+            // D:\Projects\github\kavics\KLOC
+        }
+        [TestMethod]
+        public void Directory_WithKnownFiles()
+        {
+            Assert.Inconclusive();
+            // D:\Projects\github\kavics\KLOC\src
+        }
     }
 }

@@ -43,8 +43,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Counter.cs" />
+    <Compile Include="CounterContext.cs" />
+    <Compile Include="PathEnumerable.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="ProjectFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SolutionFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

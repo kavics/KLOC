@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -19,8 +19,9 @@ namespace KLOC
             Console.WriteLine("Usage:");
             Console.WriteLine("KLOC.exe <path>");
             Console.WriteLine("<path>: Location of source code directory");
-            Console.WriteLine("                    or csproj file");
-            Console.WriteLine("                    or sln file");
+            Console.WriteLine("                    or .sln file");
+            Console.WriteLine("                    or .csproj file");
+            Console.WriteLine("                    or .cs file");
         }
 
         public static void Main(string[] args)
@@ -34,8 +35,17 @@ namespace KLOC
                 Usage("Location of source code files is missing.");
                 return;
             }
-            var path = args[0];
 
+            Run(args[0]);
+
+            if (Debugger.IsAttached)
+            {
+                Console.Write("-------- Press any key to exit --------");
+                Console.ReadKey();
+            }
+        }
+        public static void Run(string path)
+        {
             IEnumerable<string> sourceFileEnumerable = null;
             var ctx = new CounterContext();
 
@@ -48,10 +58,10 @@ namespace KLOC
                 var ext = Path.GetExtension(path).TrimStart('.').ToLowerInvariant();
                 switch (ext)
                 {
-                    case "cs":     sourceFileEnumerable = new[] { path };              break;
-                    case "csproj": sourceFileEnumerable = new ProjectFile(path, ctx);  break;
-                    case "sln":    sourceFileEnumerable = new SolutionFile(path, ctx); break;
-                    default:       Usage("Unknown location.");                         return;
+                    case "cs": sourceFileEnumerable = new[] { path }; break;
+                    case "csproj": sourceFileEnumerable = new ProjectFile(path, ctx); break;
+                    case "sln": sourceFileEnumerable = new SolutionFile(path, ctx); break;
+                    default: Usage("Unknown location."); return;
                 }
             }
             else
@@ -61,7 +71,7 @@ namespace KLOC
             }
 
             var sourceFiles = sourceFileEnumerable.ToArray();
-            CountLines(sourceFiles, ctx);
+            Counter.CountOfLines(sourceFiles, ctx);
 
             var result = string.Format("KLOC:           {0:n0}", ctx.Lines / 1000);
             Console.WriteLine(result);
@@ -80,124 +90,6 @@ namespace KLOC
             var sorted = ctx.FileTypes.OrderByDescending(x => x.Value);
             foreach (var item in sorted)
                 Console.WriteLine("{0,16}{1,15:n0}", item.Key, item.Value);
-        }
-
-        private static void CountLines(string[] sourceFiles, CounterContext ctx)
-        {
-            foreach (var sourceFile in sourceFiles)
-                CountLines(sourceFile, ctx);
-        }
-        private static void CountLines(string sourceFile, CounterContext ctx)
-        {
-            var ext = Path.GetExtension(sourceFile).ToLowerInvariant();
-            if (!ctx.FileTypes.ContainsKey(ext))
-                ctx.FileTypes[ext] = 1;
-            else
-                ctx.FileTypes[ext]++;
-
-            var fileInfo = new FileInfo(sourceFile);
-            ctx.Bytes += fileInfo.Length;
-
-            string line;
-            using (var reader = new StreamReader(sourceFile))
-            {
-                while ((line = reader.ReadLine()) != null)
-                {
-                    ctx.Lines++;
-                    if (line.Trim().Length == 0)
-                        ctx.EmptyLines++;
-                    if (line.Length > ctx.LongestLine)
-                        ctx.LongestLine = line.Length;
-                }
-            }
-        }
-    }
-
-    internal class CounterContext
-    {
-        public int Projects { get; set; }
-        public int Lines { get; set; }
-        public long Bytes { get; set; }
-        public int EmptyLines { get; set; }
-        public int LongestLine { get; internal set; }
-        public Dictionary<string, int> FileTypes { get; } = new Dictionary<string, int>();
-    }
-
-    internal abstract class PathEnumerable : IEnumerable<string>
-    {
-        public abstract IEnumerator<string> GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-    }
-
-    internal class ProjectFile : PathEnumerable
-    {
-        private string[] _relevantElementNames = new[] { "Compile", "Content", "EmbeddedResource", "None" };
-
-        private CounterContext _ctx;
-        private string _projPath;
-        public ProjectFile(string path, CounterContext ctx)
-        {
-            _ctx = ctx;
-            _projPath = path;
-
-        }
-        public override IEnumerator<string> GetEnumerator()
-        {
-            _ctx.Projects++;
-            foreach (var sourceCodeFilePath in GetSourceCodeFilePathsFromProjectFile())
-                yield return sourceCodeFilePath;
-        }
-        private IEnumerable<string> GetSourceCodeFilePathsFromProjectFile()
-        {
-            var dir = Path.GetDirectoryName(_projPath);
-            var xml = XDocument.Load(_projPath);
-            var fileNames = xml
-                .Descendants()
-                .Where(e => _relevantElementNames.Contains(e.Name.LocalName))
-                .Attributes("Include")
-                .Select(a => Path.Combine(dir, a.Value))
-                .ToArray();
-            return fileNames;
-        }
-    }
-
-    internal class SolutionFile : PathEnumerable
-    {
-        private CounterContext _ctx;
-        private string _slnPath;
-        public SolutionFile(string path, CounterContext ctx)
-        {
-            _ctx = ctx;
-            _slnPath = path;
-        }
-        public override IEnumerator<string> GetEnumerator()
-        {
-            var dir = Path.GetDirectoryName(_slnPath);
-            foreach (var projectPath in GetProjectPathsFromSolution())
-                foreach(var file in new ProjectFile(Path.Combine(dir, projectPath), _ctx))
-                    yield return file;
-        }
-        private IEnumerable<string> GetProjectPathsFromSolution()
-        {
-            var result = new List<string>();
-            string line;
-            using(var reader = new StreamReader(_slnPath))
-            {
-                while((line = reader.ReadLine()) != null)
-                {
-                    if (line.StartsWith("Project("))
-                    {
-                        var localPath = line.Split('"').FirstOrDefault(l => l.EndsWith(".csproj"));
-                        if (localPath != null)
-                            result.Add(localPath);
-                    }
-                }
-            }
-            return result;
         }
     }
 }
