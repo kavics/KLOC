@@ -7,6 +7,21 @@ namespace KlocTests
     [TestClass]
     public class ProgramTests
     {
+        private static string _rootPath; // ...\KLOC
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context)
+        {
+            // "...\KLOC\src\KlocTests\bin\Debug\KlocTests.dll" ==> "...\KLOC"
+            _rootPath = Path.GetFullPath(
+                Path.Combine(System.Reflection.Assembly.GetExecutingAssembly().Location,
+                @"..\..\..\..\..\"));
+        }
+        private string GetPath(string relativePath)
+        {
+            return Path.Combine(_rootPath, relativePath);
+        }
+
         TextWriter _savedOutput;
         [TestInitialize]
         public void Initialize()
@@ -64,8 +79,8 @@ namespace KlocTests
         public void File_UnknownType()
         {
             Assert.Inconclusive();
-            // D:\Projects\github\kavics\KLOC\README.md
-            // D:\Projects\github\kavics\KLOC\src\KlocTests\bin\Debug\KlocTests.dll
+            // GetPath("README.md
+            // GetPath("src\KlocTests\bin\Debug\KlocTests.dll
         }
         [TestMethod]
         public void File_Csharp()
@@ -73,7 +88,7 @@ namespace KlocTests
             var console = new StringWriter();
             Console.SetOut(console);
 
-            KLOC.Program.Main(new[] { @"D:\Projects\github\kavics\KLOC\src\KLOC\Program.cs" });
+            KLOC.Program.Main(new[] { GetPath(@"src\KLOC\Program.cs") });
 
             var output = console.GetStringBuilder().ToString();
             string line = null;
@@ -98,7 +113,7 @@ namespace KlocTests
             var console = new StringWriter();
             Console.SetOut(console);
 
-            KLOC.Program.Main(new[] { @"D:\Projects\github\kavics\KLOC\src\KLOC\KLOC.csproj" });
+            KLOC.Program.Main(new[] { GetPath(@"src\KLOC\KLOC.csproj") });
 
             var output = console.GetStringBuilder().ToString();
             string line = null;
@@ -123,7 +138,7 @@ namespace KlocTests
             var console = new StringWriter();
             Console.SetOut(console);
 
-            KLOC.Program.Main(new[] { @"D:\Projects\github\kavics\KLOC\src\KLOC.sln" });
+            KLOC.Program.Main(new[] { GetPath(@"src\KLOC.sln") });
 
             var output = console.GetStringBuilder().ToString();
             string line = null;
@@ -149,7 +164,7 @@ namespace KlocTests
             var console = new StringWriter();
             Console.SetOut(console);
 
-            KLOC.Program.Main(new[] { @"D:\Projects\github\kavics\KLOC1" });
+            KLOC.Program.Main(new[] { GetPath(@"notexistentdirectory") });
 
             var output = console.GetStringBuilder().ToString();
             string line;
@@ -168,7 +183,7 @@ namespace KlocTests
             var console = new StringWriter();
             Console.SetOut(console);
 
-            KLOC.Program.Main(new[] { @"D:\Projects\github\kavics" });
+            KLOC.Program.Main(new[] { _rootPath });
 
             var output = console.GetStringBuilder().ToString();
             string line = null;
@@ -191,13 +206,24 @@ namespace KlocTests
         public void Directory_GithubRepository()
         {
             Assert.Inconclusive();
-            // D:\Projects\github\kavics\KLOC
+            // _rootPath
         }
         [TestMethod]
-        public void Directory_WithKnownFiles()
+        public void Directory_WithKnownFiles_Sln()
         {
             Assert.Inconclusive();
-            // D:\Projects\github\kavics\KLOC\src
+            // GetPath("src")
+        }
+        [TestMethod]
+        public void Directory_WithKnownFiles_Csproj()
+        {
+            Assert.Inconclusive();
+            // GetPath("src")
+        }
+        [TestMethod]
+        public void Directory_WithKnownFiles_Cs()
+        {
+            Assert.Inconclusive();
         }
     }
 }
