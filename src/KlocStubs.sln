@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KLOC", "KLOC\KLOC.csproj", "{65D550E2-F659-4BF9-8BA2-3E5C1B58A416}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KlocTests", "KlocTests\KlocTests.csproj", "{007420E5-6DF4-42E6-90FF-BEA19BA856B8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stubs", "Stubs\Stubs.csproj", "{FF631E42-2F5B-48EC-8367-B9A91159C702}"
 EndProject
 Global
@@ -15,14 +11,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{65D550E2-F659-4BF9-8BA2-3E5C1B58A416}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{65D550E2-F659-4BF9-8BA2-3E5C1B58A416}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{65D550E2-F659-4BF9-8BA2-3E5C1B58A416}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{65D550E2-F659-4BF9-8BA2-3E5C1B58A416}.Release|Any CPU.Build.0 = Release|Any CPU
-		{007420E5-6DF4-42E6-90FF-BEA19BA856B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{007420E5-6DF4-42E6-90FF-BEA19BA856B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{007420E5-6DF4-42E6-90FF-BEA19BA856B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{007420E5-6DF4-42E6-90FF-BEA19BA856B8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FF631E42-2F5B-48EC-8367-B9A91159C702}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FF631E42-2F5B-48EC-8367-B9A91159C702}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF631E42-2F5B-48EC-8367-B9A91159C702}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -32,6 +20,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0C467332-BA72-4A71-912A-D4FB9B33B9C5}
+		SolutionGuid = {742D6ADC-8AE1-45F1-9D86-7182D7DB4430}
 	EndGlobalSection
 EndGlobal

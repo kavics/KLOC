@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace KLOC
 {
-    internal abstract class PathEnumerable : IEnumerable<string>
+    public abstract class PathEnumerable : IEnumerable<string>
     {
         public abstract IEnumerator<string> GetEnumerator();
 

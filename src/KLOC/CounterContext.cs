@@ -6,8 +6,13 @@ using System.Threading.Tasks;
 
 namespace KLOC
 {
-    internal class CounterContext
+    public class CounterContext
     {
+        public string InputPath { get; internal set; }
+
+        public PathEnumerable SourceFileEnumerable { get; set; }
+        public int SourceFileCount { get; internal set; }
+
         public int Projects { get; set; }
         public int Lines { get; set; }
         public long Bytes { get; set; }

@@ -9,12 +9,14 @@ namespace KLOC
 {
     internal class Counter
     {
-        public static void CountOfLines(string[] sourceFiles, CounterContext ctx)
+        internal void Count(CounterContext ctx)
         {
-            foreach (var sourceFile in sourceFiles)
-                CountOfLines(sourceFile, ctx);
+            if(ctx.SourceFileEnumerable != null)
+                foreach (var sourceFile in ctx.SourceFileEnumerable)
+                    CountOfLines(sourceFile, ctx);
         }
-        public static void CountOfLines(string sourceFile, CounterContext ctx)
+
+        private static void CountOfLines(string sourceFile, CounterContext ctx)
         {
             var ext = Path.GetExtension(sourceFile).ToLowerInvariant();
             if (!ctx.FileTypes.ContainsKey(ext))
@@ -25,10 +27,12 @@ namespace KLOC
             var fileInfo = new FileInfo(sourceFile);
             ctx.Bytes += fileInfo.Length;
 
-            using(var stream = fileInfo.OpenRead())
-            CountOfLines(stream, ctx);
+            using (var stream = fileInfo.OpenRead())
+                CountOfLines(stream, ctx);
+
+            ctx.SourceFileCount++;
         }
-        public static void CountOfLines(Stream stream, CounterContext ctx)
+        private static void CountOfLines(Stream stream, CounterContext ctx)
         {
             string line;
             using (var reader = new StreamReader(stream))

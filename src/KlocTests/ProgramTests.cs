@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
+using KLOC;
 
 namespace KlocTests
 {
@@ -78,115 +79,65 @@ namespace KlocTests
         [TestMethod]
         public void File_UnknownType_markdown()
         {
-            var console = new StringWriter();
-            Console.SetOut(console);
+            var ctx = new CounterContext { InputPath = GetPath("README.md") };
+            var mapper = new SourceCodeMapper();
+            mapper.Map(ctx);
+            new Counter().Count(ctx);
 
-            KLOC.Program.Main(new[] { GetPath("README.md") });
-
-            var output = console.GetStringBuilder().ToString();
-            string line = null;
-            using (var reader = new StringReader(output))
-            {
-                line = reader.ReadLine();
-                line = reader.ReadLine();
-                line = reader.ReadLine();
-                line = reader.ReadLine();
-            }
-            Assert.AreEqual("Not a source file.", line);
+            Assert.AreEqual("Not a source file.", mapper.Message);
+            //TODO: counter assertions
         }
         [TestMethod]
         public void File_UnknownType_dll()
         {
-            var console = new StringWriter();
-            Console.SetOut(console);
+            var ctx = new CounterContext { InputPath = GetPath(@"src\KlocTests\bin\Debug\KlocTests.dll") };
+            var mapper = new SourceCodeMapper();
+            mapper.Map(ctx);
+            new Counter().Count(ctx);
 
-            KLOC.Program.Main(new[] { GetPath(@"src\KlocTests\bin\Debug\KlocTests.dll") });
-
-            var output = console.GetStringBuilder().ToString();
-            string line = null;
-            using (var reader = new StringReader(output))
-            {
-                line = reader.ReadLine();
-                line = reader.ReadLine();
-                line = reader.ReadLine();
-                line = reader.ReadLine();
-            }
-            Assert.AreEqual("Not a source file.", line);
+            Assert.AreEqual("Not a source file.", mapper.Message);
+            //TODO: counter assertions
         }
         [TestMethod]
         public void File_Csharp()
         {
-            var console = new StringWriter();
-            Console.SetOut(console);
+            var ctx = new CounterContext { InputPath = GetPath(@"src\KLOC\Program.cs") };
+            var mapper = new SourceCodeMapper();
+            mapper.Map(ctx);
+            new Counter().Count(ctx);
 
-            KLOC.Program.Main(new[] { GetPath(@"src\KLOC\Program.cs") });
-
-            var output = console.GetStringBuilder().ToString();
-            string line = null;
-            var hasLine = false;
-            using (var reader = new StringReader(output))
-            {
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (line.StartsWith("Source files:"))
-                    {
-                        hasLine = true;
-                        Assert.IsTrue(line.EndsWith(" 1"));
-                        break;
-                    }
-                }
-            }
-            Assert.IsTrue(hasLine);
+            Assert.AreEqual(0, ctx.Projects);
+            Assert.AreEqual(1, ctx.FileTypes[".cs"]);
+            Assert.AreEqual(1, ctx.SourceFileCount);
+            //TODO: counter assertions
         }
         [TestMethod]
         public void File_Project()
         {
-            var console = new StringWriter();
-            Console.SetOut(console);
+            var ctx = new CounterContext { InputPath = GetPath(@"src\KLOC\KLOC.csproj") };
+            var mapper = new SourceCodeMapper();
+            mapper.Map(ctx);
+            new Counter().Count(ctx);
 
-            KLOC.Program.Main(new[] { GetPath(@"src\KLOC\KLOC.csproj") });
-
-            var output = console.GetStringBuilder().ToString();
-            string line = null;
-            var hasLine = false;
-            using (var reader = new StringReader(output))
-            {
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (line.StartsWith("Projects:"))
-                    {
-                        hasLine = true;
-                        Assert.IsTrue(line.EndsWith(" 1"));
-                        break;
-                    }
-                }
-            }
-            Assert.IsTrue(hasLine);
+            Assert.AreEqual(1, ctx.Projects);
+            Assert.AreEqual(10, ctx.FileTypes[".cs"]);
+            Assert.AreEqual(1, ctx.FileTypes[".config"]);
+            Assert.AreEqual(11, ctx.SourceFileCount);
+            //TODO: counter assertions
         }
         [TestMethod]
         public void File_Solution()
         {
-            var console = new StringWriter();
-            Console.SetOut(console);
+            var ctx = new CounterContext { InputPath = GetPath(@"src\KLOC.sln") };
+            var mapper = new SourceCodeMapper();
+            mapper.Map(ctx);
+            new Counter().Count(ctx);
 
-            KLOC.Program.Main(new[] { GetPath(@"src\KLOC.sln") });
-
-            var output = console.GetStringBuilder().ToString();
-            string line = null;
-            var hasLine = false;
-            using (var reader = new StringReader(output))
-            {
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (line.StartsWith("Projects:"))
-                    {
-                        hasLine = true;
-                        Assert.IsTrue(line.EndsWith(" 2"));
-                        break;
-                    }
-                }
-            }
-            Assert.IsTrue(hasLine);
+            Assert.AreEqual(3, ctx.Projects);
+            Assert.AreEqual(15, ctx.FileTypes[".cs"]);
+            Assert.AreEqual(1, ctx.FileTypes[".config"]);
+            Assert.AreEqual(16, ctx.SourceFileCount);
+            //TODO: counter assertions
         }
 
         [TestMethod]
@@ -211,31 +162,14 @@ namespace KlocTests
         [TestMethod]
         public void Directory_WithoutKnownFiles()
         {
-            var console = new StringWriter();
-            Console.SetOut(console);
+            var ctx = new CounterContext { InputPath = _rootPath };
+            var mapper = new SourceCodeMapper();
+            mapper.Map(ctx);
+            new Counter().Count(ctx);
 
-            KLOC.Program.Main(new[] { _rootPath });
-
-            var output = console.GetStringBuilder().ToString();
-            string line = null;
-            var lines = 0;
-            using (var reader = new StringReader(output))
-            {
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (line.StartsWith("Projects:"))
-                    {
-                        lines++;
-                        Assert.IsTrue(line.EndsWith(" 0"));
-                    }
-                    if (line.StartsWith("Source files:"))
-                    {
-                        lines++;
-                        Assert.IsTrue(line.EndsWith(" 0"));
-                    }
-                }
-            }
-            Assert.AreEqual(2, lines);
+            Assert.AreEqual(0, ctx.Projects);
+            Assert.AreEqual(0, ctx.SourceFileCount);
+            //TODO: counter assertions
         }
         [TestMethod]
         public void Directory_GithubRepository()
@@ -246,52 +180,27 @@ namespace KlocTests
         [TestMethod]
         public void Directory_WithKnownFiles_Sln()
         {
-            var console = new StringWriter();
-            Console.SetOut(console);
+            //UNDONE: distinct project and source files
+            var ctx = new CounterContext { InputPath = GetPath(@"src") };
+            var mapper = new SourceCodeMapper();
+            mapper.Map(ctx);
+            new Counter().Count(ctx);
 
-            KLOC.Program.Main(new[] { GetPath(@"src") });
-
-            var output = console.GetStringBuilder().ToString();
-            string line = null;
-            var hasLine = false;
-            using (var reader = new StringReader(output))
-            {
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (line.StartsWith("Projects:"))
-                    {
-                        hasLine = true;
-                        Assert.IsTrue(line.EndsWith(" 2"));
-                        break;
-                    }
-                }
-            }
-            Assert.IsTrue(hasLine);
+            Assert.AreEqual(3, ctx.Projects);
+            Assert.AreEqual(16, ctx.SourceFileCount);
+            //TODO: counter assertions
         }
         [TestMethod]
         public void Directory_WithKnownFiles_Csproj()
         {
-            var console = new StringWriter();
-            Console.SetOut(console);
+            var ctx = new CounterContext { InputPath = GetPath(@"src\KLOC") };
+            var mapper = new SourceCodeMapper();
+            mapper.Map(ctx);
+            new Counter().Count(ctx);
 
-            KLOC.Program.Main(new[] { GetPath(@"src\KLOC") });
-
-            var output = console.GetStringBuilder().ToString();
-            string line = null;
-            var hasLine = false;
-            using (var reader = new StringReader(output))
-            {
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (line.StartsWith("Projects:"))
-                    {
-                        hasLine = true;
-                        Assert.IsTrue(line.EndsWith(" 1"));
-                        break;
-                    }
-                }
-            }
-            Assert.IsTrue(hasLine);
+            Assert.AreEqual(1, ctx.Projects);
+            Assert.AreEqual(11, ctx.SourceFileCount);
+            //TODO: counter assertions
         }
         [TestMethod]
         public void Directory_WithKnownFiles_Cs()

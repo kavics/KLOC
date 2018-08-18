@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,7 +35,12 @@ namespace KLOC
                 return;
             }
 
-            Run(args[0]);
+            var ctx = new CounterContext
+            {
+                InputPath = args[0]
+            };
+
+            Run(ctx);
 
             if (Debugger.IsAttached)
             {
@@ -45,35 +49,21 @@ namespace KLOC
                     Console.ReadKey();
             }
         }
-        public static void Run(string path)
+        public static void Run(CounterContext ctx)
         {
-            IEnumerable<string> sourceFileEnumerable = null;
-            var ctx = new CounterContext();
-
-            if (Directory.Exists(path))
+            var mapper = new SourceCodeMapper();
+            if (!mapper.Map(ctx))
             {
-                sourceFileEnumerable = new ProjectDirectory(path, ctx);
-            }
-            else if (File.Exists(path))
-            {
-                var ext = Path.GetExtension(path).TrimStart('.').ToLowerInvariant();
-                switch (ext)
-                {
-                    case "cs": sourceFileEnumerable = new[] { path }; break;
-                    case "csproj": sourceFileEnumerable = new ProjectFile(path, ctx); break;
-                    case "sln": sourceFileEnumerable = new SolutionFile(path, ctx); break;
-                    default: Usage("Not a source file."); return;
-                }
-            }
-            else
-            {
-                Usage("Location of source code files does not exist.");
+                Usage(mapper.Message);
                 return;
             }
 
-            var sourceFiles = sourceFileEnumerable.ToArray();
-            Counter.CountOfLines(sourceFiles, ctx);
+            new Counter().Count(ctx);
 
+            Render(ctx);
+        }
+        private static void Render(CounterContext ctx)
+        {
             var result = string.Format("KLOC:           {0:n0}", ctx.Lines / 1000);
             Console.WriteLine(result);
             Console.WriteLine(new string('=', result.Length));
@@ -82,7 +72,7 @@ namespace KLOC
             Console.WriteLine("-------");
             Console.WriteLine();
             Console.WriteLine("Projects:       {0,15:n0}", ctx.Projects);
-            Console.WriteLine("Source files:   {0,15:n0}", sourceFiles.Length);
+            Console.WriteLine("Source files:   {0,15:n0}", ctx.SourceFileCount);
             Console.WriteLine("Bytes length:   {0,15:n0}", ctx.Bytes);
             Console.WriteLine("Longest line:   {0,15:n0}", ctx.LongestLine);
             Console.WriteLine("Count of lines: {0,15:n0}", ctx.Lines);
