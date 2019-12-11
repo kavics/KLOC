@@ -37,9 +37,14 @@ namespace KLOC
                     .Where(x => !x.EndsWith("\\.vs", StringComparison.OrdinalIgnoreCase))
                     .Where(x => !x.EndsWith("\\bin", StringComparison.OrdinalIgnoreCase))
                     .Where(x => !x.EndsWith("\\obj", StringComparison.OrdinalIgnoreCase))
-                    .Where(x => !x.ToLower().Contains("\\packagesŁ\\"))
-                    .Where(x => !x.ToLower().Contains("\\testresult\\"))
-                    .Where(x => !x.ToLower().Contains("\\netstandard"))
+                    .Where(x => !x.EndsWith("\\references", StringComparison.OrdinalIgnoreCase))
+                    .Where(x => !x.EndsWith("\\packages", StringComparison.OrdinalIgnoreCase))
+                    .Where(x => !x.EndsWith("\\testresults", StringComparison.OrdinalIgnoreCase))
+                    .Where(x => !x.EndsWith("\\netstandard", StringComparison.OrdinalIgnoreCase))
+                    //.Where(x => !x.ToLower().Contains("\\references\\"))
+                    //.Where(x => !x.ToLower().Contains("\\packages\\"))
+                    //.Where(x => !x.ToLower().Contains("\\testresult\\"))
+                    //.Where(x => !x.ToLower().Contains("\\netstandard"))
                     .ToArray();
 
                 foreach (var dir in dirs)
