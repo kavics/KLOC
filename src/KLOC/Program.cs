@@ -19,24 +19,24 @@ namespace KLOC
             Console.WriteLine("Usage:");
             Console.WriteLine("KLOC.exe <path>");
             Console.WriteLine("<path>: Location of source code directory");
-            Console.WriteLine("                    or .sln file");
-            Console.WriteLine("                    or .csproj file");
-            Console.WriteLine("                    or .cs file");
         }
 
         public static void Main(string[] args)
         {
+args = new[] { @"D:\dev\github\sensenet\src\" }; //UNDONE: DELETE
             Console.WriteLine("Kay-LOC");
             Console.WriteLine("<? Kilo Lines Of Code.");
             Console.WriteLine();
 
             if (args.Length != 1)
             {
-                Usage("Location of source code files is missing.");
+                Usage("Location of source code directory is missing.");
                 return;
             }
 
+            var timer = Stopwatch.StartNew();
             Run(args[0]);
+            Console.WriteLine("Processing time: " + timer.Elapsed);
 
             if (Debugger.IsAttached)
             {
@@ -54,22 +54,13 @@ namespace KLOC
             {
                 sourceFileEnumerable = new ProjectDirectory(path, ctx);
             }
-            else if (File.Exists(path))
-            {
-                var ext = Path.GetExtension(path).TrimStart('.').ToLowerInvariant();
-                switch (ext)
-                {
-                    case "cs": sourceFileEnumerable = new[] { path }; break;
-                    case "csproj": sourceFileEnumerable = new ProjectFile(path, ctx); break;
-                    case "sln": sourceFileEnumerable = new SolutionFile(path, ctx); break;
-                    default: Usage("Not a source file."); return;
-                }
-            }
             else
             {
-                Usage("Location of source code files does not exist.");
+                Usage("Location of source code directory does not exist.");
                 return;
             }
+
+            Console.WriteLine("Path: " + path);
 
             var sourceFiles = sourceFileEnumerable.ToArray();
             Counter.CountOfLines(sourceFiles, ctx);
@@ -81,7 +72,7 @@ namespace KLOC
             Console.WriteLine("DETAILS");
             Console.WriteLine("-------");
             Console.WriteLine();
-            Console.WriteLine("Projects:       {0,15:n0}", ctx.Projects);
+            //Console.WriteLine("Projects:       {0,15:n0}", ctx.Projects);
             Console.WriteLine("Source files:   {0,15:n0}", sourceFiles.Length);
             Console.WriteLine("Bytes length:   {0,15:n0}", ctx.Bytes);
             Console.WriteLine("Longest line:   {0,15:n0}", ctx.LongestLine);
