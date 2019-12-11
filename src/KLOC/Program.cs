@@ -17,25 +17,36 @@ namespace KLOC
                 Console.WriteLine(message);
             Console.WriteLine();
             Console.WriteLine("Usage:");
-            Console.WriteLine("KLOC.exe <path>");
-            Console.WriteLine("<path>: Location of source code directory");
+            Console.WriteLine("KLOC.exe <path> [-l|k[p]] [-c]");
+            Console.WriteLine("<path>: Location of source code directory (required)");
+            Console.WriteLine("        Displays Kay-LOC and statistics of the source files in depth.");
+            Console.WriteLine("-k:     Displays only Kay-LOC.");
+            Console.WriteLine("-l:     Displays only source line count.");
+            Console.WriteLine("-kp:    Displays only Kay-LOC and path.");
+            Console.WriteLine("-lp:    Displays only source line count and path.");
+            Console.WriteLine("-c:     Enumerate and count sub-directories and displays a name-count pairs in a table.");
         }
 
         public static void Main(string[] args)
         {
-args = new[] { @"D:\dev\github\sensenet\src\" }; //UNDONE: DELETE
             Console.WriteLine("Kay-LOC");
             Console.WriteLine("<? Kilo Lines Of Code.");
             Console.WriteLine();
 
-            if (args.Length != 1)
+            var arguments = Arguments.Parse(args);
+            if (arguments == null)
             {
-                Usage("Location of source code directory is missing.");
+                Usage("Invalid arguments.");
+                return;
+            }
+            if (arguments.IsHelp)
+            {
+                Usage();
                 return;
             }
 
             var timer = Stopwatch.StartNew();
-            Run(args[0]);
+            Run(arguments);
             Console.WriteLine("Processing time: " + timer.Elapsed);
 
             if (Debugger.IsAttached)
@@ -45,14 +56,14 @@ args = new[] { @"D:\dev\github\sensenet\src\" }; //UNDONE: DELETE
                     Console.ReadKey();
             }
         }
-        public static void Run(string path)
+        public static void Run(Arguments arguments)
         {
             IEnumerable<string> sourceFileEnumerable = null;
             var ctx = new CounterContext();
 
-            if (Directory.Exists(path))
+            if (Directory.Exists(arguments.ProjectDirectory))
             {
-                sourceFileEnumerable = new ProjectDirectory(path, ctx);
+                sourceFileEnumerable = new ProjectDirectory(arguments.ProjectDirectory, ctx);
             }
             else
             {
@@ -60,7 +71,7 @@ args = new[] { @"D:\dev\github\sensenet\src\" }; //UNDONE: DELETE
                 return;
             }
 
-            Console.WriteLine("Path: " + path);
+            Console.WriteLine("Path: " + arguments.ProjectDirectory);
 
             var sourceFiles = sourceFileEnumerable.ToArray();
             Counter.CountOfLines(sourceFiles, ctx);

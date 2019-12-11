@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Arguments.cs" />
     <Compile Include="Counter.cs" />
     <Compile Include="CounterContext.cs" />
     <Compile Include="PathEnumerable.cs" />
