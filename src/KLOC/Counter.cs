@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace KLOC
 {
@@ -16,7 +11,7 @@ namespace KLOC
         }
         public static void CountOfLines(string sourceFile, CounterContext ctx)
         {
-            var ext = Path.GetExtension(sourceFile).ToLowerInvariant();
+            var ext = Path.GetExtension(sourceFile)?.ToLowerInvariant() ?? "";
             if (!ctx.FileTypes.ContainsKey(ext))
                 ctx.FileTypes[ext] = 1;
             else
@@ -30,9 +25,9 @@ namespace KLOC
         }
         public static void CountOfLines(Stream stream, CounterContext ctx)
         {
-            string line;
             using (var reader = new StreamReader(stream))
             {
+                string line;
                 while ((line = reader.ReadLine()) != null)
                 {
                     ctx.Lines++;

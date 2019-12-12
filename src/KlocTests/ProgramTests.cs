@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
+// ReSharper disable RedundantAssignment
 
 namespace KlocTests
 {
@@ -17,12 +18,12 @@ namespace KlocTests
                 Path.Combine(System.Reflection.Assembly.GetExecutingAssembly().Location,
                 @"..\..\..\..\..\"));
         }
-        private string GetPath(string relativePath)
+        private static string GetPath(string relativePath)
         {
             return Path.Combine(_rootPath, relativePath);
         }
 
-        TextWriter _savedOutput;
+        private TextWriter _savedOutput;
         [TestInitialize]
         public void Initialize()
         {
@@ -122,10 +123,10 @@ namespace KlocTests
             KLOC.Program.Main(new[] { GetPath(@"src\KLOC\Program.cs") });
 
             var output = console.GetStringBuilder().ToString();
-            string line = null;
             var hasLine = false;
             using (var reader = new StringReader(output))
             {
+                string line = null;
                 while ((line = reader.ReadLine()) != null)
                 {
                     if (line.StartsWith("Source files:"))
@@ -147,10 +148,10 @@ namespace KlocTests
             KLOC.Program.Main(new[] { GetPath(@"src\KLOC\KLOC.csproj") });
 
             var output = console.GetStringBuilder().ToString();
-            string line = null;
             var hasLine = false;
             using (var reader = new StringReader(output))
             {
+                string line = null;
                 while ((line = reader.ReadLine()) != null)
                 {
                     if (line.StartsWith("Projects:"))
@@ -172,10 +173,10 @@ namespace KlocTests
             KLOC.Program.Main(new[] { GetPath(@"src\KLOC.sln") });
 
             var output = console.GetStringBuilder().ToString();
-            string line = null;
             var hasLine = false;
             using (var reader = new StringReader(output))
             {
+                string line = null;
                 while ((line = reader.ReadLine()) != null)
                 {
                     if (line.StartsWith("Projects:"))
@@ -217,10 +218,10 @@ namespace KlocTests
             KLOC.Program.Main(new[] { _rootPath });
 
             var output = console.GetStringBuilder().ToString();
-            string line = null;
             var lines = 0;
             using (var reader = new StringReader(output))
             {
+                string line = null;
                 while ((line = reader.ReadLine()) != null)
                 {
                     if (line.StartsWith("Projects:"))
@@ -252,10 +253,10 @@ namespace KlocTests
             KLOC.Program.Main(new[] { GetPath(@"src") });
 
             var output = console.GetStringBuilder().ToString();
-            string line = null;
             var hasLine = false;
             using (var reader = new StringReader(output))
             {
+                string line = null;
                 while ((line = reader.ReadLine()) != null)
                 {
                     if (line.StartsWith("Projects:"))
@@ -277,10 +278,10 @@ namespace KlocTests
             KLOC.Program.Main(new[] { GetPath(@"src\KLOC") });
 
             var output = console.GetStringBuilder().ToString();
-            string line = null;
             var hasLine = false;
             using (var reader = new StringReader(output))
             {
+                string line = null;
                 while ((line = reader.ReadLine()) != null)
                 {
                     if (line.StartsWith("Projects:"))

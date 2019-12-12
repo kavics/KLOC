@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace KLOC
 {
@@ -25,13 +20,14 @@ namespace KLOC
                 Console.WriteLine(message);
             Console.WriteLine();
             Console.WriteLine("Usage:");
-            Console.WriteLine("KLOC.exe <path> [-l|k[p]] [-c]");
+            //Console.WriteLine("KLOC.exe <path> [-l|k[p]] [-c]");
+            Console.WriteLine("KLOC.exe <path> [-c]");
             Console.WriteLine("<path>: Location of source code directory (required)");
             Console.WriteLine("        Displays Kay-LOC and statistics of the source files in depth.");
-            Console.WriteLine("-k:     Displays only Kay-LOC.");
-            Console.WriteLine("-l:     Displays only source line count.");
-            Console.WriteLine("-kp:    Displays only Kay-LOC and path.");
-            Console.WriteLine("-lp:    Displays only source line count and path.");
+            //Console.WriteLine("-k:     Displays only Kay-LOC.");
+            //Console.WriteLine("-l:     Displays only source line count.");
+            //Console.WriteLine("-kp:    Displays only Kay-LOC and path.");
+            //Console.WriteLine("-lp:    Displays only source line count and path.");
             Console.WriteLine("-c:     Enumerate and count sub-directories and displays a name-count pairs in a table.");
         }
 
@@ -51,11 +47,8 @@ namespace KLOC
 
             var timer = Stopwatch.StartNew();
             Run(arguments);
-            if (arguments.WriteDeatails)
-            {
-                Console.WriteLine();
-                Console.WriteLine("Processing time: " + timer.Elapsed);
-            }
+            Console.WriteLine();
+            Console.WriteLine("Processing time: " + timer.Elapsed);
 
             if (Debugger.IsAttached)
             {
@@ -66,24 +59,26 @@ namespace KLOC
         }
         public static void Run(Arguments arguments)
         {
-            IEnumerable<string> sourceFileEnumerable = null;
-            var ctx = new CounterContext();
 
-            if (Directory.Exists(arguments.ProjectDirectory))
-            {
-                sourceFileEnumerable = new ProjectDirectory(arguments.ProjectDirectory, ctx);
-            }
-            else
+            if (!Directory.Exists(arguments.ProjectDirectory))
             {
                 Usage("Location of source code directory does not exist.");
                 return;
             }
 
+            if (arguments.IsContainer)
+            {
+                ProcessContainer(arguments);
+                return;
+            }
+
+            var ctx = new CounterContext();
+            var sourceFileEnumerable = new ProjectDirectory(arguments.ProjectDirectory);
             var sourceFiles = sourceFileEnumerable.ToArray();
             Counter.CountOfLines(sourceFiles, ctx);
 
-            var result1 = "PATH:   " + arguments.ProjectDirectory;
-            var result2 = $"KayLOC: {ctx.Lines / 1000:n0}";
+            var result1 = "PATH:    " + arguments.ProjectDirectory;
+            var result2 = $"Kay-LOC: {ctx.Lines / 1000:n0}";
 
             WriteHead();
             Console.WriteLine(result1);
@@ -93,7 +88,6 @@ namespace KLOC
             Console.WriteLine("DETAILS");
             Console.WriteLine("-------");
             Console.WriteLine();
-            //Console.WriteLine("Projects:       {0,15:n0}", ctx.Projects);
             Console.WriteLine("Source files:   {0,15:n0}", sourceFiles.Length);
             Console.WriteLine("Bytes length:   {0,15:n0}", ctx.Bytes);
             Console.WriteLine("Longest line:   {0,15:n0}", ctx.LongestLine);
@@ -104,6 +98,37 @@ namespace KLOC
             var sorted = ctx.FileTypes.OrderByDescending(x => x.Value);
             foreach (var item in sorted)
                 Console.WriteLine("{0,16}{1,15:n0}", item.Key, item.Value);
+        }
+
+        private static void ProcessContainer(Arguments arguments)
+        {
+            var mainProjectDirectory = new ProjectDirectory(arguments.ProjectDirectory);
+            var subDirectories = mainProjectDirectory.GetDirectories();
+
+            var colWidth = subDirectories.Max(x => Path.GetFileName(x)?.Length ?? 0) + 2;
+            var line = $"{new string('-', colWidth)} -------------";
+            WriteHead();
+            Console.WriteLine("CONTAINER: " + arguments.ProjectDirectory);
+            Console.WriteLine();
+            Console.WriteLine($"{"NAME".PadRight(colWidth)} Lines Of Code");
+            Console.WriteLine(line);
+            var sum = 0;
+
+            foreach (var subDirectory in subDirectories)
+            {
+                Console.Write($"{(Path.GetFileName(subDirectory) ?? "").PadRight(colWidth)} ");
+
+                var sourceFileEnumerable = new ProjectDirectory(subDirectory);
+                var sourceFiles = sourceFileEnumerable.ToArray();
+                var ctx = new CounterContext();
+                Counter.CountOfLines(sourceFiles, ctx);
+
+                Console.WriteLine($"{ctx.Lines,13:n0}");
+                sum += ctx.Lines;
+            }
+
+            Console.WriteLine(line);
+            Console.WriteLine($"{"SUMMARY".PadRight(colWidth)} {sum,13:n0}");
         }
     }
 }
