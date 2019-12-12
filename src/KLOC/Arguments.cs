@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace KLOC
+﻿namespace KLOC
 {
     internal class Arguments
     {
@@ -17,14 +11,16 @@ namespace KLOC
 
         internal static Arguments Parse(string[] args)
         {
-            var result = new Arguments();
-            result.WriteDeatails = true;
+            var result = new Arguments {WriteDeatails = true};
             foreach (var arg in args)
             {
                 if (arg[0] == '-' || arg[0] == '/')
                 {
                     switch (arg.ToLowerInvariant().Substring(1))
                     {
+                        case "?":
+                            result.IsHelp = true;
+                            break;
                         case "c":
                             result.IsContainer = true;
                             result.WriteDeatails = false;
@@ -59,11 +55,6 @@ namespace KLOC
             }
 
             return result;
-        }
-
-        private static void ParseOption(string arg, Arguments config)
-        {
-            throw new NotImplementedException();
         }
     }
 }

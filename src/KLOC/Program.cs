@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace KLOC
 {
@@ -80,7 +75,7 @@ namespace KLOC
             }
 
             var ctx = new CounterContext();
-            var sourceFileEnumerable = new ProjectDirectory(arguments.ProjectDirectory, ctx);
+            var sourceFileEnumerable = new ProjectDirectory(arguments.ProjectDirectory);
             var sourceFiles = sourceFileEnumerable.ToArray();
             Counter.CountOfLines(sourceFiles, ctx);
 
@@ -95,7 +90,6 @@ namespace KLOC
             Console.WriteLine("DETAILS");
             Console.WriteLine("-------");
             Console.WriteLine();
-            //Console.WriteLine("Projects:       {0,15:n0}", ctx.Projects);
             Console.WriteLine("Source files:   {0,15:n0}", sourceFiles.Length);
             Console.WriteLine("Bytes length:   {0,15:n0}", ctx.Bytes);
             Console.WriteLine("Longest line:   {0,15:n0}", ctx.LongestLine);
@@ -110,11 +104,10 @@ namespace KLOC
 
         private static void ProcessContainer(Arguments arguments)
         {
-            var mainCtx = new CounterContext();
-            var mainProjectDirectory = new ProjectDirectory(arguments.ProjectDirectory, mainCtx);
+            var mainProjectDirectory = new ProjectDirectory(arguments.ProjectDirectory);
             var subDirectories = mainProjectDirectory.GetDirectories();
 
-            var colWidth = subDirectories.Max(x => Path.GetFileName(x).Length) + 2;
+            var colWidth = subDirectories.Max(x => Path.GetFileName(x)?.Length ?? 0) + 2;
             var line = $"{new string('-', colWidth)} -------------";
             WriteHead();
             Console.WriteLine("CONTAINER: " + arguments.ProjectDirectory);
@@ -125,11 +118,11 @@ namespace KLOC
 
             foreach (var subDirectory in subDirectories)
             {
-                Console.Write($"{Path.GetFileName(subDirectory).PadRight(colWidth)} ");
+                Console.Write($"{(Path.GetFileName(subDirectory) ?? "").PadRight(colWidth)} ");
 
-                var ctx = new CounterContext();
-                var sourceFileEnumerable = new ProjectDirectory(subDirectory, ctx);
+                var sourceFileEnumerable = new ProjectDirectory(subDirectory);
                 var sourceFiles = sourceFileEnumerable.ToArray();
+                var ctx = new CounterContext();
                 Counter.CountOfLines(sourceFiles, ctx);
 
                 Console.WriteLine($"{ctx.Lines,13:n0}");

@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace KLOC
 {
     internal class CounterContext
     {
-        public int Projects { get; set; }
         public int Lines { get; set; }
         public long Bytes { get; set; }
         public int EmptyLines { get; set; }

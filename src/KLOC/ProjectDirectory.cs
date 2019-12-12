@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KLOC
 {
     internal class ProjectDirectory : PathEnumerable
     {
-        //private CounterContext _ctx;
-        private string _directoryPath;
+        private readonly string _directoryPath;
 
-        public ProjectDirectory(string directoryPath, CounterContext ctx)
+        public ProjectDirectory(string directoryPath)
         {
             _directoryPath = directoryPath;
-            //_ctx = ctx;
         }
 
         public override IEnumerator<string> GetEnumerator()
@@ -29,9 +24,9 @@ namespace KLOC
             return DirectoryEnumerable.GetEnabledDirectories(_directoryPath);
         }
 
-        class DirectoryEnumerable : PathEnumerable
+        private class DirectoryEnumerable : PathEnumerable
         {
-            private string _path;
+            private readonly string _path;
             public DirectoryEnumerable(string path)
             {
                 _path = path;
@@ -59,18 +54,18 @@ namespace KLOC
                     .ToArray();
             }
 
-            private static readonly string[] DisabledDirectoryNames = new[]
+            private static readonly string[] DisabledDirectoryNames =
             {
                 ".git", ".vs", "bin", "obj", "docs", "references", "packages", "testresults", "netstandard"
             };
             private static bool IsEnabledDirectory(string path)
             {
-                var name = Path.GetFileName(path).ToLowerInvariant();
+                var name = Path.GetFileName(path)?.ToLowerInvariant() ?? "";
                 return !DisabledDirectoryNames.Contains(name);
 
             }
 
-            private static readonly string[] DisabledExtensions = new[]
+            private static readonly string[] DisabledExtensions =
             {
                 ".ico", ".jpg", ".png", ".gif" , ".zip", ".dll", ".exe", ".pdb"
             };
