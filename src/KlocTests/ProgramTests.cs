@@ -53,7 +53,7 @@ namespace KlocTests
                 line = reader.ReadLine();
                 line = reader.ReadLine();
             }
-            Assert.AreEqual("Location of source code files is missing.", line);
+            Assert.AreEqual("Location of source code directory is missing.", line);
         }
         [TestMethod]
         public void Parameter_Wrong()
@@ -72,7 +72,7 @@ namespace KlocTests
                 line = reader.ReadLine();
                 line = reader.ReadLine();
             }
-            Assert.AreEqual("Location of source code files does not exist.", line);
+            Assert.AreEqual("Location of source code directory does not exist.", line);
         }
 
         [TestMethod]
@@ -206,7 +206,7 @@ namespace KlocTests
                 line = reader.ReadLine();
                 line = reader.ReadLine();
             }
-            Assert.AreEqual("Location of source code files does not exist.", line);
+            Assert.AreEqual("Location of source code directory does not exist.", line);
         }
         [TestMethod]
         public void Directory_WithoutKnownFiles()

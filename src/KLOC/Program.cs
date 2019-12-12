@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,32 +12,50 @@ namespace KLOC
 {
     internal class Program
     {
-        private static void Usage(string message = null)
-        {
-            if (message != null)
-                Console.WriteLine(message);
-            Console.WriteLine();
-            Console.WriteLine("Usage:");
-            Console.WriteLine("KLOC.exe <path>");
-            Console.WriteLine("<path>: Location of source code directory");
-            Console.WriteLine("                    or .sln file");
-            Console.WriteLine("                    or .csproj file");
-            Console.WriteLine("                    or .cs file");
-        }
-
-        public static void Main(string[] args)
+        private static void WriteHead()
         {
             Console.WriteLine("Kay-LOC");
             Console.WriteLine("<? Kilo Lines Of Code.");
             Console.WriteLine();
+        }
+        private static void Usage(string message = null)
+        {
+            WriteHead();
+            if (message != null)
+                Console.WriteLine(message);
+            Console.WriteLine();
+            Console.WriteLine("Usage:");
+            Console.WriteLine("KLOC.exe <path> [-l|k[p]] [-c]");
+            Console.WriteLine("<path>: Location of source code directory (required)");
+            Console.WriteLine("        Displays Kay-LOC and statistics of the source files in depth.");
+            Console.WriteLine("-k:     Displays only Kay-LOC.");
+            Console.WriteLine("-l:     Displays only source line count.");
+            Console.WriteLine("-kp:    Displays only Kay-LOC and path.");
+            Console.WriteLine("-lp:    Displays only source line count and path.");
+            Console.WriteLine("-c:     Enumerate and count sub-directories and displays a name-count pairs in a table.");
+        }
 
-            if (args.Length != 1)
+        public static void Main(string[] args)
+        {
+            var arguments = Arguments.Parse(args);
+            if (arguments == null)
             {
-                Usage("Location of source code files is missing.");
+                Usage("Invalid arguments.");
+                return;
+            }
+            if (arguments.IsHelp)
+            {
+                Usage();
                 return;
             }
 
-            Run(args[0]);
+            var timer = Stopwatch.StartNew();
+            Run(arguments);
+            if (arguments.WriteDeatails)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Processing time: " + timer.Elapsed);
+            }
 
             if (Debugger.IsAttached)
             {
@@ -45,48 +64,42 @@ namespace KLOC
                     Console.ReadKey();
             }
         }
-        public static void Run(string path)
+        public static void Run(Arguments arguments)
         {
             IEnumerable<string> sourceFileEnumerable = null;
             var ctx = new CounterContext();
 
-            if (Directory.Exists(path))
+            if (Directory.Exists(arguments.ProjectDirectory))
             {
-                sourceFileEnumerable = new ProjectDirectory(path, ctx);
-            }
-            else if (File.Exists(path))
-            {
-                var ext = Path.GetExtension(path).TrimStart('.').ToLowerInvariant();
-                switch (ext)
-                {
-                    case "cs": sourceFileEnumerable = new[] { path }; break;
-                    case "csproj": sourceFileEnumerable = new ProjectFile(path, ctx); break;
-                    case "sln": sourceFileEnumerable = new SolutionFile(path, ctx); break;
-                    default: Usage("Not a source file."); return;
-                }
+                sourceFileEnumerable = new ProjectDirectory(arguments.ProjectDirectory, ctx);
             }
             else
             {
-                Usage("Location of source code files does not exist.");
+                Usage("Location of source code directory does not exist.");
                 return;
             }
 
             var sourceFiles = sourceFileEnumerable.ToArray();
             Counter.CountOfLines(sourceFiles, ctx);
 
-            var result = string.Format("KLOC:           {0:n0}", ctx.Lines / 1000);
-            Console.WriteLine(result);
-            Console.WriteLine(new string('=', result.Length));
+            var result1 = "PATH:   " + arguments.ProjectDirectory;
+            var result2 = $"KayLOC: {ctx.Lines / 1000:n0}";
+
+            WriteHead();
+            Console.WriteLine(result1);
+            Console.WriteLine(result2);
+            Console.WriteLine(new string('=', Math.Max(result1.Length, result2.Length)));
             Console.WriteLine();
             Console.WriteLine("DETAILS");
             Console.WriteLine("-------");
             Console.WriteLine();
-            Console.WriteLine("Projects:       {0,15:n0}", ctx.Projects);
+            //Console.WriteLine("Projects:       {0,15:n0}", ctx.Projects);
             Console.WriteLine("Source files:   {0,15:n0}", sourceFiles.Length);
             Console.WriteLine("Bytes length:   {0,15:n0}", ctx.Bytes);
             Console.WriteLine("Longest line:   {0,15:n0}", ctx.LongestLine);
             Console.WriteLine("Count of lines: {0,15:n0}", ctx.Lines);
             Console.WriteLine("Empty lines:    {0,15:n0}", ctx.EmptyLines);
+            Console.WriteLine();
             Console.WriteLine("File types:");
             var sorted = ctx.FileTypes.OrderByDescending(x => x.Value);
             foreach (var item in sorted)

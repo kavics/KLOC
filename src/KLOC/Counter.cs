@@ -26,7 +26,7 @@ namespace KLOC
             ctx.Bytes += fileInfo.Length;
 
             using(var stream = fileInfo.OpenRead())
-            CountOfLines(stream, ctx);
+                CountOfLines(stream, ctx);
         }
         public static void CountOfLines(Stream stream, CounterContext ctx)
         {

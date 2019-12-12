@@ -20,27 +20,48 @@ namespace KLOC
 
         public override IEnumerator<string> GetEnumerator()
         {
-            var fileGroups = GetRelevantFiles();
-            foreach (var fileGroup in fileGroups)
-                foreach (var file in fileGroup)
-                    yield return file;
+            // Enumerate all files in depth
+            return new DirectoryEnumerable(_directoryPath).GetEnumerator();
         }
 
-        private IEnumerable<PathEnumerable> GetRelevantFiles()
+        class DirectoryEnumerable : PathEnumerable
         {
-            var slnFiles = Directory.GetFiles(_directoryPath, "*.sln");
-            if (slnFiles.Length != 0)
-                return slnFiles.Select(s => new SolutionFile(s, _ctx));
+            private string _path;
+            public DirectoryEnumerable(string path)
+            {
+                _path = path;
+            }
+            public override IEnumerator<string> GetEnumerator()
+            {
+                var dirs = Directory.GetDirectories(_path)
+                    .Where(IsEnabledDirectory)
+                    .ToArray();
 
-            var csprojFiles = Directory.GetFiles(_directoryPath, "*.csproj");
-            if (csprojFiles.Length != 0)
-                return csprojFiles.Select(s => new ProjectFile(s, _ctx));
+                foreach (var dir in dirs)
+                {
+                    foreach (var file in new DirectoryEnumerable(dir))
+                        yield return file;
+                }
 
-            var csFiles = Directory.GetFiles(_directoryPath, "*.cs");
-            if (csFiles.Length != 0)
-                return new PathEnumerable[] { new SourceFiles(csFiles) };
+                foreach (var file in Directory.GetFiles(_path))
+                    if (IsEnabledFile(file))
+                        yield return file;
+            }
 
-            return new PathEnumerable[0];
+            private static readonly string[] DisabledDirectoryNames = new[] { ".vs", "bin", "obj", "references", "packages", "testresults", "netstandard" };
+            private bool IsEnabledDirectory(string path)
+            {
+                var name = Path.GetFileName(path).ToLowerInvariant();
+                return !DisabledDirectoryNames.Contains(name);
+
+            }
+
+            private static readonly string[] DisabledExtensions = new[] { ".ico", ".jpg", ".png", ".gif" };
+            private bool IsEnabledFile(string path)
+            {
+                var ext = Path.GetExtension(path)?.ToLowerInvariant();
+                return !DisabledExtensions.Contains(ext);
+            }
         }
     }
 }
