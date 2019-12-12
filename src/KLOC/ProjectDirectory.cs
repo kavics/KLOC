@@ -9,19 +9,24 @@ namespace KLOC
 {
     internal class ProjectDirectory : PathEnumerable
     {
-        private CounterContext _ctx;
+        //private CounterContext _ctx;
         private string _directoryPath;
 
         public ProjectDirectory(string directoryPath, CounterContext ctx)
         {
             _directoryPath = directoryPath;
-            _ctx = ctx;
+            //_ctx = ctx;
         }
 
         public override IEnumerator<string> GetEnumerator()
         {
             // Enumerate all files in depth
             return new DirectoryEnumerable(_directoryPath).GetEnumerator();
+        }
+
+        public string[] GetDirectories()
+        {
+            return DirectoryEnumerable.GetEnabledDirectories(_directoryPath);
         }
 
         class DirectoryEnumerable : PathEnumerable
@@ -33,11 +38,7 @@ namespace KLOC
             }
             public override IEnumerator<string> GetEnumerator()
             {
-                var dirs = Directory.GetDirectories(_path)
-                    .Where(IsEnabledDirectory)
-                    .ToArray();
-
-                foreach (var dir in dirs)
+                foreach (var dir in GetEnabledDirectories(_path))
                 {
                     foreach (var file in new DirectoryEnumerable(dir))
                         yield return file;
@@ -48,16 +49,32 @@ namespace KLOC
                         yield return file;
             }
 
-            private static readonly string[] DisabledDirectoryNames = new[] { ".vs", "bin", "obj", "references", "packages", "testresults", "netstandard" };
-            private bool IsEnabledDirectory(string path)
+            /// <summary>
+            /// Returns all enabled child directories.
+            /// </summary>
+            public static string[] GetEnabledDirectories(string path)
+            {
+                return Directory.GetDirectories(path)
+                    .Where(IsEnabledDirectory)
+                    .ToArray();
+            }
+
+            private static readonly string[] DisabledDirectoryNames = new[]
+            {
+                ".git", ".vs", "bin", "obj", "docs", "references", "packages", "testresults", "netstandard"
+            };
+            private static bool IsEnabledDirectory(string path)
             {
                 var name = Path.GetFileName(path).ToLowerInvariant();
                 return !DisabledDirectoryNames.Contains(name);
 
             }
 
-            private static readonly string[] DisabledExtensions = new[] { ".ico", ".jpg", ".png", ".gif" };
-            private bool IsEnabledFile(string path)
+            private static readonly string[] DisabledExtensions = new[]
+            {
+                ".ico", ".jpg", ".png", ".gif" , ".zip", ".dll", ".exe", ".pdb"
+            };
+            private static bool IsEnabledFile(string path)
             {
                 var ext = Path.GetExtension(path)?.ToLowerInvariant();
                 return !DisabledExtensions.Contains(ext);
