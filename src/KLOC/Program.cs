@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,8 +12,15 @@ namespace KLOC
 {
     internal class Program
     {
+        private static void WriteHead()
+        {
+            Console.WriteLine("Kay-LOC");
+            Console.WriteLine("<? Kilo Lines Of Code.");
+            Console.WriteLine();
+        }
         private static void Usage(string message = null)
         {
+            WriteHead();
             if (message != null)
                 Console.WriteLine(message);
             Console.WriteLine();
@@ -29,10 +37,6 @@ namespace KLOC
 
         public static void Main(string[] args)
         {
-            Console.WriteLine("Kay-LOC");
-            Console.WriteLine("<? Kilo Lines Of Code.");
-            Console.WriteLine();
-
             var arguments = Arguments.Parse(args);
             if (arguments == null)
             {
@@ -47,7 +51,11 @@ namespace KLOC
 
             var timer = Stopwatch.StartNew();
             Run(arguments);
-            Console.WriteLine("Processing time: " + timer.Elapsed);
+            if (arguments.WriteDeatails)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Processing time: " + timer.Elapsed);
+            }
 
             if (Debugger.IsAttached)
             {
@@ -71,14 +79,16 @@ namespace KLOC
                 return;
             }
 
-            Console.WriteLine("Path: " + arguments.ProjectDirectory);
-
             var sourceFiles = sourceFileEnumerable.ToArray();
             Counter.CountOfLines(sourceFiles, ctx);
 
-            var result = string.Format("KLOC:           {0:n0}", ctx.Lines / 1000);
-            Console.WriteLine(result);
-            Console.WriteLine(new string('=', result.Length));
+            var result1 = "PATH:   " + arguments.ProjectDirectory;
+            var result2 = $"KayLOC: {ctx.Lines / 1000:n0}";
+
+            WriteHead();
+            Console.WriteLine(result1);
+            Console.WriteLine(result2);
+            Console.WriteLine(new string('=', Math.Max(result1.Length, result2.Length)));
             Console.WriteLine();
             Console.WriteLine("DETAILS");
             Console.WriteLine("-------");
@@ -89,6 +99,7 @@ namespace KLOC
             Console.WriteLine("Longest line:   {0,15:n0}", ctx.LongestLine);
             Console.WriteLine("Count of lines: {0,15:n0}", ctx.Lines);
             Console.WriteLine("Empty lines:    {0,15:n0}", ctx.EmptyLines);
+            Console.WriteLine();
             Console.WriteLine("File types:");
             var sorted = ctx.FileTypes.OrderByDescending(x => x.Value);
             foreach (var item in sorted)

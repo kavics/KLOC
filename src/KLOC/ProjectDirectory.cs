@@ -34,17 +34,7 @@ namespace KLOC
             public override IEnumerator<string> GetEnumerator()
             {
                 var dirs = Directory.GetDirectories(_path)
-                    .Where(x => !x.EndsWith("\\.vs", StringComparison.OrdinalIgnoreCase))
-                    .Where(x => !x.EndsWith("\\bin", StringComparison.OrdinalIgnoreCase))
-                    .Where(x => !x.EndsWith("\\obj", StringComparison.OrdinalIgnoreCase))
-                    .Where(x => !x.EndsWith("\\references", StringComparison.OrdinalIgnoreCase))
-                    .Where(x => !x.EndsWith("\\packages", StringComparison.OrdinalIgnoreCase))
-                    .Where(x => !x.EndsWith("\\testresults", StringComparison.OrdinalIgnoreCase))
-                    .Where(x => !x.EndsWith("\\netstandard", StringComparison.OrdinalIgnoreCase))
-                    //.Where(x => !x.ToLower().Contains("\\references\\"))
-                    //.Where(x => !x.ToLower().Contains("\\packages\\"))
-                    //.Where(x => !x.ToLower().Contains("\\testresult\\"))
-                    //.Where(x => !x.ToLower().Contains("\\netstandard"))
+                    .Where(IsEnabledDirectory)
                     .ToArray();
 
                 foreach (var dir in dirs)
@@ -54,7 +44,23 @@ namespace KLOC
                 }
 
                 foreach (var file in Directory.GetFiles(_path))
-                    yield return file;
+                    if (IsEnabledFile(file))
+                        yield return file;
+            }
+
+            private static readonly string[] DisabledDirectoryNames = new[] { ".vs", "bin", "obj", "references", "packages", "testresults", "netstandard" };
+            private bool IsEnabledDirectory(string path)
+            {
+                var name = Path.GetFileName(path).ToLowerInvariant();
+                return !DisabledDirectoryNames.Contains(name);
+
+            }
+
+            private static readonly string[] DisabledExtensions = new[] { ".ico", ".jpg", ".png", ".gif" };
+            private bool IsEnabledFile(string path)
+            {
+                var ext = Path.GetExtension(path)?.ToLowerInvariant();
+                return !DisabledExtensions.Contains(ext);
             }
         }
     }
