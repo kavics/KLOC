@@ -20,13 +20,14 @@ namespace KLOC
                 Console.WriteLine(message);
             Console.WriteLine();
             Console.WriteLine("Usage:");
-            Console.WriteLine("KLOC.exe <path> [-l|k[p]] [-c]");
+            //Console.WriteLine("KLOC.exe <path> [-l|k[p]] [-c]");
+            Console.WriteLine("KLOC.exe <path> [-c]");
             Console.WriteLine("<path>: Location of source code directory (required)");
             Console.WriteLine("        Displays Kay-LOC and statistics of the source files in depth.");
-            Console.WriteLine("-k:     Displays only Kay-LOC.");
-            Console.WriteLine("-l:     Displays only source line count.");
-            Console.WriteLine("-kp:    Displays only Kay-LOC and path.");
-            Console.WriteLine("-lp:    Displays only source line count and path.");
+            //Console.WriteLine("-k:     Displays only Kay-LOC.");
+            //Console.WriteLine("-l:     Displays only source line count.");
+            //Console.WriteLine("-kp:    Displays only Kay-LOC and path.");
+            //Console.WriteLine("-lp:    Displays only source line count and path.");
             Console.WriteLine("-c:     Enumerate and count sub-directories and displays a name-count pairs in a table.");
         }
 
@@ -46,11 +47,8 @@ namespace KLOC
 
             var timer = Stopwatch.StartNew();
             Run(arguments);
-            if (arguments.WriteDeatails)
-            {
-                Console.WriteLine();
-                Console.WriteLine("Processing time: " + timer.Elapsed);
-            }
+            Console.WriteLine();
+            Console.WriteLine("Processing time: " + timer.Elapsed);
 
             if (Debugger.IsAttached)
             {
