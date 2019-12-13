@@ -44,10 +44,10 @@ namespace KLOC
         }
         public static void Run(string[] args)
         {
-            var arguments = Arguments.Parse(args);
+            var arguments = Arguments.Parse(args, out var message);
             if (arguments == null)
             {
-                Usage("Invalid arguments.");
+                Usage(message ?? "Invalid arguments.");
                 return;
             }
             if (arguments.IsHelp)
