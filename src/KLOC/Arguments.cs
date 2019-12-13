@@ -53,9 +53,8 @@ namespace KLOC
 
         private static string[] ParseFileExtensions(string list)
         {
-            return list.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => x.ToLowerInvariant())
-                .Select(x => x[0] == '.' ? x : "." + x)
+            return list.Split(new[] {','}, StringSplitOptions.None)
+                .Select(x => x.Trim().ToLowerInvariant())
                 .ToArray();
         }
     }

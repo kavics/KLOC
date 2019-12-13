@@ -76,7 +76,7 @@ namespace KLOC
                 return;
             }
 
-            var ctx = new CounterContext();
+            var ctx = new CounterContext(arguments);
             var sourceFileEnumerable = new ProjectDirectory(arguments.ProjectDirectory);
             var sourceFiles = sourceFileEnumerable.ToArray();
             Counter.CountOfLines(sourceFiles, ctx);
@@ -124,7 +124,7 @@ namespace KLOC
 
                 var sourceFileEnumerable = new ProjectDirectory(subDirectory);
                 var sourceFiles = sourceFileEnumerable.ToArray();
-                var ctx = new CounterContext();
+                var ctx = new CounterContext(arguments);
                 Counter.CountOfLines(sourceFiles, ctx);
 
                 Console.WriteLine($"{ctx.Lines,13:n0}");
