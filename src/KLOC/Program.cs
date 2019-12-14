@@ -21,22 +21,33 @@ namespace KLOC
             Console.WriteLine();
             Console.WriteLine("Usage:");
             //Console.WriteLine("KLOC.exe <path> [-l|k[p]] [-c]");
-            Console.WriteLine("KLOC.exe <path> [-c]");
-            Console.WriteLine("<path>: Location of source code directory (required)");
-            Console.WriteLine("        Displays Kay-LOC and statistics of the source files in depth.");
-            //Console.WriteLine("-k:     Displays only Kay-LOC.");
-            //Console.WriteLine("-l:     Displays only source line count.");
-            //Console.WriteLine("-kp:    Displays only Kay-LOC and path.");
-            //Console.WriteLine("-lp:    Displays only source line count and path.");
-            Console.WriteLine("-c:     Enumerate and count sub-directories and displays a name-count pairs in a table.");
+            Console.WriteLine("KLOC.exe <path> [-c] [-ext:<extlist>]");
+            Console.WriteLine("<path>:     Location of source code directory (required)");
+            Console.WriteLine("-c:         Enumerate and count sub-directories and displays a name-count pairs in a table.");
+            Console.WriteLine("-ext:       Whitelist of enabled file-extensions.");
+            Console.WriteLine("<extlist>:  Comma separated file-extension list (valid extension starts with '.').");
+            Console.WriteLine("");
+            Console.WriteLine("Example:");
+            Console.WriteLine("KLOC.exe d:\\dev\\github\\ [-c] [-ext:.cs,.sql]");
         }
 
         public static void Main(string[] args)
         {
-            var arguments = Arguments.Parse(args);
+            Run(args);
+
+            if (Debugger.IsAttached)
+            {
+                Console.Write("-------- Press any key to exit --------");
+                if (!System.Reflection.Assembly.GetExecutingAssembly().Location.Contains(@"\KlocTests\"))
+                    Console.ReadKey();
+            }
+        }
+        public static void Run(string[] args)
+        {
+            var arguments = Arguments.Parse(args, out var message);
             if (arguments == null)
             {
-                Usage("Invalid arguments.");
+                Usage(message ?? "Invalid arguments.");
                 return;
             }
             if (arguments.IsHelp)
@@ -49,13 +60,6 @@ namespace KLOC
             Run(arguments);
             Console.WriteLine();
             Console.WriteLine("Processing time: " + timer.Elapsed);
-
-            if (Debugger.IsAttached)
-            {
-                Console.Write("-------- Press any key to exit --------");
-                if (!System.Reflection.Assembly.GetExecutingAssembly().Location.Contains(@"\KlocTests\"))
-                    Console.ReadKey();
-            }
         }
         public static void Run(Arguments arguments)
         {
@@ -72,7 +76,7 @@ namespace KLOC
                 return;
             }
 
-            var ctx = new CounterContext();
+            var ctx = new CounterContext(arguments);
             var sourceFileEnumerable = new ProjectDirectory(arguments.ProjectDirectory);
             var sourceFiles = sourceFileEnumerable.ToArray();
             Counter.CountOfLines(sourceFiles, ctx);
@@ -120,7 +124,7 @@ namespace KLOC
 
                 var sourceFileEnumerable = new ProjectDirectory(subDirectory);
                 var sourceFiles = sourceFileEnumerable.ToArray();
-                var ctx = new CounterContext();
+                var ctx = new CounterContext(arguments);
                 Counter.CountOfLines(sourceFiles, ctx);
 
                 Console.WriteLine($"{ctx.Lines,13:n0}");

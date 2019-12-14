@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 
 namespace KLOC
 {
@@ -12,6 +13,11 @@ namespace KLOC
         public static void CountOfLines(string sourceFile, CounterContext ctx)
         {
             var ext = Path.GetExtension(sourceFile)?.ToLowerInvariant() ?? "";
+
+            var enabledExts = ctx.Arguments.EnabledFileExtensions;
+            if (enabledExts != null && !enabledExts.Contains(ext))
+                return;
+
             if (!ctx.FileTypes.ContainsKey(ext))
                 ctx.FileTypes[ext] = 1;
             else
