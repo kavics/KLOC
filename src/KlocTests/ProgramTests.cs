@@ -126,6 +126,20 @@ namespace KlocTests
             //TODO: counter assertions
         }
         [TestMethod]
+        public void File_NetStandard_Project()
+        {
+            var ctx = new CounterContext { InputPath = GetPath(@"src\NetStandardStubs\NetStandardStubs.csproj") };
+            var mapper = new SourceCodeMapper();
+            mapper.Map(ctx);
+            new Counter().Count(ctx);
+
+            Assert.AreEqual(1, ctx.Projects);
+            Assert.AreEqual(2, ctx.FileTypes[".cs"]);
+            Assert.AreEqual(1, ctx.FileTypes[".config"]);
+            Assert.AreEqual(12, ctx.SourceFileCount);
+            //TODO: counter assertions
+        }
+        [TestMethod]
         public void File_Solution()
         {
             var ctx = new CounterContext { InputPath = GetPath(@"src\KLOC.sln") };
@@ -186,8 +200,8 @@ namespace KlocTests
             mapper.Map(ctx);
             new Counter().Count(ctx);
 
-            Assert.AreEqual(3, ctx.Projects);
-            Assert.AreEqual(16, ctx.SourceFileCount);
+            Assert.AreEqual(4, ctx.Projects);
+            Assert.AreEqual(30, ctx.SourceFileCount);
             //TODO: counter assertions
         }
         [TestMethod]

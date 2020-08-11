@@ -18,14 +18,14 @@ namespace KLOC
         }
         public override IEnumerator<string> GetEnumerator()
         {
-            var dir = Path.GetDirectoryName(_slnPath);
             foreach (var projectPath in GetProjectPathsFromSolution())
-                foreach (var file in new ProjectFile(Path.Combine(dir, projectPath), _ctx))
+                foreach (var file in new ProjectFile(projectPath, _ctx))
                     yield return file;
         }
         private IEnumerable<string> GetProjectPathsFromSolution()
         {
             var result = new List<string>();
+            var dir = Path.GetDirectoryName(_slnPath);
             string line;
             using (var reader = new StreamReader(_slnPath))
             {
@@ -34,8 +34,15 @@ namespace KLOC
                     if (line.StartsWith("Project("))
                     {
                         var localPath = line.Split('"').FirstOrDefault(l => l.EndsWith(".csproj"));
-                        if (localPath != null)
-                            result.Add(localPath);
+                        var absPath = Path.GetFullPath(Path.Combine(dir, localPath));
+                        if (absPath != null)
+                        {
+                            if (!_ctx.ProjectPaths.Contains(absPath))
+                            {
+                                _ctx.ProjectPaths.Add(absPath);
+                                result.Add(absPath);
+                            }
+                        }
                     }
                 }
             }

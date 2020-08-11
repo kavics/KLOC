@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KLOC", "KLOC\KLOC.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KlocTests", "KlocTests\KlocTests.csproj", "{007420E5-6DF4-42E6-90FF-BEA19BA856B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stubs", "Stubs\Stubs.csproj", "{FF631E42-2F5B-48EC-8367-B9A91159C702}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetStandardStubs", "NetStandardStubs\NetStandardStubs.csproj", "{3DAF8D0D-1B55-4C5B-9A4D-E26C11C2A47A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{007420E5-6DF4-42E6-90FF-BEA19BA856B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{007420E5-6DF4-42E6-90FF-BEA19BA856B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{007420E5-6DF4-42E6-90FF-BEA19BA856B8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FF631E42-2F5B-48EC-8367-B9A91159C702}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FF631E42-2F5B-48EC-8367-B9A91159C702}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FF631E42-2F5B-48EC-8367-B9A91159C702}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FF631E42-2F5B-48EC-8367-B9A91159C702}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DAF8D0D-1B55-4C5B-9A4D-E26C11C2A47A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DAF8D0D-1B55-4C5B-9A4D-E26C11C2A47A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DAF8D0D-1B55-4C5B-9A4D-E26C11C2A47A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DAF8D0D-1B55-4C5B-9A4D-E26C11C2A47A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

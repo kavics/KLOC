@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stubs", "Stubs\Stubs.csproj", "{FF631E42-2F5B-48EC-8367-B9A91159C702}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetStandardStubs", "NetStandardStubs\NetStandardStubs.csproj", "{6FD4A4C6-6D74-4198-93D4-BCC4CA23110E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{FF631E42-2F5B-48EC-8367-B9A91159C702}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF631E42-2F5B-48EC-8367-B9A91159C702}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF631E42-2F5B-48EC-8367-B9A91159C702}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FD4A4C6-6D74-4198-93D4-BCC4CA23110E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FD4A4C6-6D74-4198-93D4-BCC4CA23110E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FD4A4C6-6D74-4198-93D4-BCC4CA23110E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FD4A4C6-6D74-4198-93D4-BCC4CA23110E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

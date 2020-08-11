@@ -19,5 +19,7 @@ namespace KLOC
         public int EmptyLines { get; set; }
         public int LongestLine { get; internal set; }
         public Dictionary<string, int> FileTypes { get; } = new Dictionary<string, int>();
+
+        public List<string> ProjectPaths { get; } = new List<string>();
     }
 }
