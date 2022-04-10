@@ -110,11 +110,11 @@ namespace KLOC
             var subDirectories = mainProjectDirectory.GetDirectories();
 
             var colWidth = subDirectories.Max(x => Path.GetFileName(x)?.Length ?? 0) + 2;
-            var line = $"{new string('-', colWidth)} -------------";
+            var line = $"{new string('-', colWidth)} -------------  -------------------------------------------";
             WriteHead();
             Console.WriteLine("CONTAINER: " + arguments.ProjectDirectory);
             Console.WriteLine();
-            Console.WriteLine($"{"NAME".PadRight(colWidth)} Lines Of Code");
+            Console.WriteLine($"{"NAME".PadRight(colWidth)} Lines Of Code  Count of source top file types");
             Console.WriteLine(line);
             var sum = 0;
 
@@ -127,12 +127,25 @@ namespace KLOC
                 var ctx = new CounterContext(arguments);
                 Counter.CountOfLines(sourceFiles, ctx);
 
-                Console.WriteLine($"{ctx.Lines,13:n0}");
+                Console.WriteLine($"{ctx.Lines,13:n0}  {PrintAnalysis(ctx)}");
                 sum += ctx.Lines;
             }
 
             Console.WriteLine(line);
             Console.WriteLine($"{"SUMMARY".PadRight(colWidth)} {sum,13:n0}");
+        }
+
+        private static string PrintAnalysis(CounterContext ctx)
+        {
+            var sum = ctx.FileTypes.Values.Sum();
+
+            var topSrcTypes = ctx.FileTypes
+                .OrderByDescending(x => x.Value)
+                .Select(x => $"{x.Value * 100 / sum,3}% {x.Key,-8} ")
+                .Take(3)
+                .ToArray();
+
+            return string.Join(" ", topSrcTypes);
         }
     }
 }
