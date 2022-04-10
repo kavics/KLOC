@@ -16,7 +16,7 @@ namespace KlocTests
             // "...\KLOC\src\KlocTests\bin\Debug\KlocTests.dll" ==> "...\KLOC"
             _rootPath = Path.GetFullPath(
                 Path.Combine(System.Reflection.Assembly.GetExecutingAssembly().Location,
-                @"..\..\..\..\..\"));
+                @"..\..\..\..\..\..\"));
         }
         private static string GetPath(string relativePath)
         {
@@ -101,7 +101,7 @@ namespace KlocTests
             var console = new StringWriter();
             Console.SetOut(console);
 
-            KLOC.Program.Main(new[] { GetPath(@"src\KlocTests\bin\Debug\KlocTests.dll") });
+            KLOC.Program.Main(new[] { GetPath(@"src\KlocTests\bin\Debug\net5.0\KlocTests.dll") });
 
             var output = console.GetStringBuilder().ToString();
             string line = null;
@@ -210,35 +210,6 @@ namespace KlocTests
             Assert.AreEqual("Location of source code directory does not exist.", line);
         }
         [TestMethod]
-        public void Directory_WithoutKnownFiles()
-        {
-            var console = new StringWriter();
-            Console.SetOut(console);
-
-            KLOC.Program.Main(new[] { _rootPath });
-
-            var output = console.GetStringBuilder().ToString();
-            var lines = 0;
-            using (var reader = new StringReader(output))
-            {
-                string line = null;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (line.StartsWith("Projects:"))
-                    {
-                        lines++;
-                        Assert.IsTrue(line.EndsWith(" 0"));
-                    }
-                    if (line.StartsWith("Source files:"))
-                    {
-                        lines++;
-                        Assert.IsTrue(line.EndsWith(" 0"));
-                    }
-                }
-            }
-            Assert.AreEqual(2, lines);
-        }
-        [TestMethod]
         public void Directory_GithubRepository()
         {
             Assert.Inconclusive();
@@ -259,7 +230,7 @@ namespace KlocTests
                 string line = null;
                 while ((line = reader.ReadLine()) != null)
                 {
-                    if (line.StartsWith("Projects:"))
+                    if (line.Contains(" .csproj "))
                     {
                         hasLine = true;
                         Assert.IsTrue(line.EndsWith(" 2"));
@@ -284,7 +255,7 @@ namespace KlocTests
                 string line = null;
                 while ((line = reader.ReadLine()) != null)
                 {
-                    if (line.StartsWith("Projects:"))
+                    if (line.Contains(" .csproj "))
                     {
                         hasLine = true;
                         Assert.IsTrue(line.EndsWith(" 1"));

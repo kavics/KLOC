@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace KLOC
 {
-    internal class Arguments
+    public class Arguments
     {
         public string ProjectDirectory { get; private set; }
         public bool IsContainer { get; private set; }
