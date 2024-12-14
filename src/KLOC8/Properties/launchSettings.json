@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "KLOC8": {
+      "commandName": "Project",
+      //"commandLineArgs": "D:\\dev\\tfs\\manfred\\backend -t .cs,.xml"
+      //"commandLineArgs": "D:\\dev\\tfs\\manfred\\backend -t .cs,.sql"
+      "commandLineArgs": "D:\\dev\\github\\sensenet"
+    }
+  }
+}
