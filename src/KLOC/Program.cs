@@ -68,7 +68,7 @@ namespace KLOC
             var ctx = new CounterContext(arguments);
             var sourceFileEnumerable = new ProjectDirectory(arguments.ProjectDirectory);
             var sourceFiles = sourceFileEnumerable.ToArray();
-            Counter.CountOfLines(sourceFiles, ctx);
+            var counts = Counter.CountOfLines(sourceFiles, ctx);
 
             var result1 = "PATH:    " + arguments.ProjectDirectory;
             var result2 = $"Kay-LOC: {ctx.Lines / 1000:n0}";
@@ -90,6 +90,12 @@ namespace KLOC
             Console.WriteLine("File types:");
             var sorted = ctx.FileTypes.OrderByDescending(x => x.Value);
             foreach (var item in sorted)
+                Console.WriteLine("{0,16}{1,15:n0}", item.Key, item.Value);
+            Console.WriteLine();
+
+            Console.WriteLine("KLOC per file types:");
+            var sorted2 = counts.OrderByDescending(x => x.Value);
+            foreach (var item in sorted2)
                 Console.WriteLine("{0,16}{1,15:n0}", item.Key, item.Value);
         }
 

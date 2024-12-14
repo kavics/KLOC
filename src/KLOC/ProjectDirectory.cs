@@ -56,7 +56,8 @@ namespace KLOC
 
             private static readonly string[] DisabledDirectoryNames =
             {
-                ".git", ".vs", "bin", "obj", "docs", "references", "packages", "testresults", "netstandard"
+                ".git", ".vs", "bin", "obj", "docs", "references", "packages", "testresults", "netstandard",
+                "app_data", "nuget"
             };
             private static bool IsEnabledDirectory(string path)
             {
@@ -67,7 +68,7 @@ namespace KLOC
 
             private static readonly string[] DisabledExtensions =
             {
-                ".ico", ".jpg", ".png", ".gif" , ".zip", ".dll", ".exe", ".pdb"
+                ".ico", ".jpg", ".png", ".gif" , ".zip", ".dll", ".exe", ".pdb", ".aab" /*Android Application Bundles*/
             };
             private static bool IsEnabledFile(string path)
             {

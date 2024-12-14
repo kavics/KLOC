@@ -2,7 +2,9 @@
   "profiles": {
     "KLOC": {
       "commandName": "Project",
-      "commandLineArgs": "D:\\dev\\github1 -c"
+      //"commandLineArgs": "D:\\dev\\tfs\\manfred"
+      "commandLineArgs": "D:\\dev\\tfs\\manfred\\backend"
+      //"commandLineArgs": "D:\\dev\\tfs\\manfred\\mobile"
     }
   }
 }
