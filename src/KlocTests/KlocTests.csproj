@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\KLOC\KLOC.csproj" />
+    <ProjectReference Include="..\KLOC8\KLOC8.csproj" />
   </ItemGroup>
 
 </Project>
