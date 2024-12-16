@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "KLOC": {
-      "commandName": "Project",
-      "commandLineArgs": "D:\\dev\\github1 -c"
-    }
-  }
-}
