@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.Metrics;
-using System.Reflection;
+﻿using System.Globalization;
 
 namespace KLOC8;
 
@@ -20,8 +19,9 @@ internal class KlocCommand
         var sourceFiles = sourceFileEnumerable.ToArray();
         var counts = CountOfLines(sourceFiles, enabledExts, ctx);
 
-        var result1 = "PATH:    " + path;
-        var result2 = $"Kay-LOC: {ctx.Lines / 1000:n0}";
+        var result1 = $"KLOC: {ctx.Lines / 1000:n0}";
+        //var result1 = $"Kay-LOC: {(ctx.Lines * 1.0 / 1000.0).ToString("0.###", CultureInfo.InvariantCulture)}";
+        var result2 = $"PATH: {path}     {Path.GetFullPath(path)}";
 
         WriteHead();
         Console.WriteLine(result1);
@@ -31,11 +31,12 @@ internal class KlocCommand
         Console.WriteLine("DETAILS");
         Console.WriteLine("-------");
         Console.WriteLine();
+        Console.WriteLine("Count of lines: {0,15:n0}", ctx.Lines);
         Console.WriteLine("Source files:   {0,15:n0}", sourceFiles.Length);
         Console.WriteLine("Bytes length:   {0,15:n0}", ctx.Bytes);
-        Console.WriteLine("Longest line:   {0,15:n0}", ctx.LongestLine);
-        Console.WriteLine("Count of lines: {0,15:n0}", ctx.Lines);
         Console.WriteLine("Empty lines:    {0,15:n0}", ctx.EmptyLines);
+        Console.WriteLine("Longest file:   {0,15:n0} lines, {1}", ctx.LongestFileLength, Path.GetFullPath(ctx.LongestFile));
+        Console.WriteLine("Longest line:   {0,15:n0} characters, {1}, line:{2}", ctx.LongestLineLength, Path.GetFullPath(ctx.LongestLineFile), ctx.LongestLineLine);
 
         //Console.WriteLine();
         //Console.WriteLine("File types:");
@@ -120,23 +121,35 @@ internal class KlocCommand
         ctx.Bytes += fileInfo.Length;
 
         using (var stream = fileInfo.OpenRead())
-            return CountOfLines(stream, ctx);
+            return CountOfLines(stream, sourceFile, ctx);
     }
-    private int? CountOfLines(Stream stream, CounterContext ctx)
+    private int? CountOfLines(Stream stream, string filePath, CounterContext ctx)
     {
         var lines = 0;
 
         using var reader = new StreamReader(stream);
 
         string line;
+        var lineIndex = 0;
         while ((line = reader.ReadLine()) != null)
         {
+            lineIndex++;
             lines++;
             ctx.Lines++;
             if (line.Trim().Length == 0)
                 ctx.EmptyLines++;
-            if (line.Length > ctx.LongestLine)
-                ctx.LongestLine = line.Length;
+            if (line.Length > ctx.LongestLineLength)
+            {
+                ctx.LongestLineLength = line.Length;
+                ctx.LongestLineFile = filePath;
+                ctx.LongestLineLine = lineIndex;
+            }
+        }
+
+        if (lines > ctx.LongestFileLength)
+        {
+            ctx.LongestFileLength = lines;
+            ctx.LongestFile = filePath;
         }
 
         return lines;
