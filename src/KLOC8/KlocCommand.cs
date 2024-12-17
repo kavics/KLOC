@@ -185,9 +185,9 @@ internal class KlocCommand
             var sourceFileEnumerable = new ProjectDirectory(subDirectory);
             var ctx = new CounterContext();
             CountOfLines(sourceFileEnumerable, enabledExts, ctx);
-            Console.WriteLine($"{(Path.GetFileName(subDirectory) ?? "").PadRight(colWidth)} " +
-                              $"{ctx.Lines,13:n0}  " +
-                              $"{PrintAnalysis(ctx)}".PadRight(Console.WindowWidth-1));
+            var msg = $"{(Path.GetFileName(subDirectory) ?? "").PadRight(colWidth)} {ctx.Lines,13:n0}  {PrintAnalysis(ctx)}";
+            msg = msg.PadRight(Console.WindowWidth - 1);
+            Console.WriteLine(msg);
             sum += ctx.Lines;
         }
 

@@ -3,9 +3,10 @@
     "KLOC8": {
       "commandName": "Project",
       //"commandLineArgs": "D:\\dev\\tfs\\manfred"
-      "commandLineArgs": "D:\\dev\\tfs\\manfred -c"
+      //"commandLineArgs": "D:\\dev\\tfs\\manfred -c"
       //"commandLineArgs": "D:\\dev\\tfs\\manfred\\backend"
       //"commandLineArgs": "D:\\dev\\tfs\\manfred\\backend -t .cs,.sql"
+      "commandLineArgs": "D:\\dev\\github -c"
       //"commandLineArgs": "D:\\dev\\github\\sensenet"
     }
   }

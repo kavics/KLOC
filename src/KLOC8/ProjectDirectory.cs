@@ -26,7 +26,7 @@ internal class ProjectDirectory : PathEnumerable
                     var text = count + "  " + path;
                     if (text.Length > width)
                         text = text.Substring(0, width - 3) + "...";
-                    text = text.PadRight(width+10, ' ');
+                    text = text.PadRight(width+9, ' ');
                     Console.Write(text + "\r");
                 }
                 lastProgressAt = DateTime.Now;
