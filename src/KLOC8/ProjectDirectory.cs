@@ -16,8 +16,6 @@ internal class ProjectDirectory : PathEnumerable
         // Enumerate all files in depth
         foreach (var path in new DirectoryEnumerable(_directoryPath))
         {
-Task.Delay(1).Wait();
-
             count++;
             if ((DateTime.Now - lastProgressAt).TotalMilliseconds > 100)
             {
