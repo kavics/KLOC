@@ -11,8 +11,31 @@ internal class ProjectDirectory : PathEnumerable
 
     public override IEnumerator<string> GetEnumerator()
     {
+        var count = 0;
+        var lastProgressAt = DateTime.Now;
         // Enumerate all files in depth
-        return new DirectoryEnumerable(_directoryPath).GetEnumerator();
+        foreach (var path in new DirectoryEnumerable(_directoryPath))
+        {
+Task.Delay(1).Wait();
+
+            count++;
+            if ((DateTime.Now - lastProgressAt).TotalMilliseconds > 100)
+            {
+                var width = Console.WindowWidth-10;
+
+                if (width > 20)
+                {
+                    var text = count + "  " + path;
+                    if (text.Length > width)
+                        text = text.Substring(0, width - 3) + "...";
+                    text = text.PadRight(width+10, ' ');
+                    Console.Write(text + "\r");
+                }
+                lastProgressAt = DateTime.Now;
+            }
+            yield return path;
+        }
+        //return new DirectoryEnumerable(_directoryPath).GetEnumerator();
     }
 
     public string[] GetDirectories()
@@ -66,7 +89,7 @@ internal class ProjectDirectory : PathEnumerable
 
         private static readonly string[] DisabledExtensions =
         {
-            ".ico", ".jpg", ".png", ".gif" , ".zip", ".dll", ".exe", ".pdb", ".aab" /*Android Application Bundles*/,
+            ".ico", ".jpg", ".png", ".gif", ".svg", ".zip", ".dll", ".exe", ".pdb", ".aab" /*Android Application Bundles*/,
             ".so" /* AsposePreviewGenerator */
         };
         private static bool IsEnabledFile(string path)
