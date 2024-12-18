@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.Metrics;
-using System.Reflection;
+﻿using System.Globalization;
 
 namespace KLOC8;
 
@@ -15,27 +14,31 @@ internal class KlocCommand
             return;
         }
 
+        WriteHead();
+        var result1 = $"PATH: {Path.GetFullPath(path)}";
+        Console.WriteLine(result1);
+
         var ctx = new CounterContext();
         var sourceFileEnumerable = new ProjectDirectory(path);
-        var sourceFiles = sourceFileEnumerable.ToArray();
-        var counts = CountOfLines(sourceFiles, enabledExts, ctx);
+        var (fileCount, counts) = CountOfLines(sourceFileEnumerable, enabledExts, ctx);
+        Console.Write(" ".PadRight(Console.WindowWidth - 1));
+        Console.Write("\r");
 
-        var result1 = "PATH:    " + path;
-        var result2 = $"Kay-LOC: {ctx.Lines / 1000:n0}";
+        var result2 = $"KLOC: {ctx.Lines / 1000:n0}";
+        //var result1 = $"Kay-LOC: {(ctx.Lines * 1.0 / 1000.0).ToString("0.###", CultureInfo.InvariantCulture)}";
 
-        WriteHead();
-        Console.WriteLine(result1);
         Console.WriteLine(result2);
         Console.WriteLine(new string('=', Math.Max(result1.Length, result2.Length)));
         Console.WriteLine();
         Console.WriteLine("DETAILS");
         Console.WriteLine("-------");
         Console.WriteLine();
-        Console.WriteLine("Source files:   {0,15:n0}", sourceFiles.Length);
-        Console.WriteLine("Bytes length:   {0,15:n0}", ctx.Bytes);
-        Console.WriteLine("Longest line:   {0,15:n0}", ctx.LongestLine);
         Console.WriteLine("Count of lines: {0,15:n0}", ctx.Lines);
+        Console.WriteLine("Source files:   {0,15:n0}", fileCount);
+        Console.WriteLine("Bytes length:   {0,15:n0}", ctx.Bytes);
         Console.WriteLine("Empty lines:    {0,15:n0}", ctx.EmptyLines);
+        Console.WriteLine("Longest file:   {0,15:n0} lines, {1}", ctx.LongestFileLength, Path.GetFullPath(ctx.LongestFile));
+        Console.WriteLine("Longest line:   {0,15:n0} characters, {1}, line:{2}", ctx.LongestLineLength, Path.GetFullPath(ctx.LongestLineFile), ctx.LongestLineLine);
 
         //Console.WriteLine();
         //Console.WriteLine("File types:");
@@ -66,16 +69,18 @@ internal class KlocCommand
         }
     }
 
-    private Dictionary<string, int> CountOfLines(string[] sourceFiles, string[]? enabledExts, CounterContext ctx)
+    private (int fileCount, Dictionary<string, int> counts) CountOfLines(IEnumerable<string> sourceFiles, string[]? enabledExts, CounterContext ctx)
     {
         var file = new FileInfo("KLOC-TEMP.txt");
         file.Delete();
 
+        var fileCount = 0;
         using (var writer = new StreamWriter("KLOC-TEMP.txt", false))
         {
             writer.WriteLine($"Path\tSLOC");
             foreach (var sourceFile in sourceFiles)
             {
+                fileCount++;
                 var lines = CountOfLines(sourceFile, enabledExts, ctx);
                 if (lines != null)
                     writer.WriteLine($"{sourceFile}\t{lines}");
@@ -102,7 +107,7 @@ internal class KlocCommand
             }
         }
 
-        return countsPerFileType;
+        return (fileCount, countsPerFileType);
     }
     private int? CountOfLines(string sourceFile, string[]? enabledExts, CounterContext ctx)
     {
@@ -120,23 +125,35 @@ internal class KlocCommand
         ctx.Bytes += fileInfo.Length;
 
         using (var stream = fileInfo.OpenRead())
-            return CountOfLines(stream, ctx);
+            return CountOfLines(stream, sourceFile, ctx);
     }
-    private int? CountOfLines(Stream stream, CounterContext ctx)
+    private int? CountOfLines(Stream stream, string filePath, CounterContext ctx)
     {
         var lines = 0;
 
         using var reader = new StreamReader(stream);
 
         string line;
+        var lineIndex = 0;
         while ((line = reader.ReadLine()) != null)
         {
+            lineIndex++;
             lines++;
             ctx.Lines++;
             if (line.Trim().Length == 0)
                 ctx.EmptyLines++;
-            if (line.Length > ctx.LongestLine)
-                ctx.LongestLine = line.Length;
+            if (line.Length > ctx.LongestLineLength)
+            {
+                ctx.LongestLineLength = line.Length;
+                ctx.LongestLineFile = filePath;
+                ctx.LongestLineLine = lineIndex;
+            }
+        }
+
+        if (lines > ctx.LongestFileLength)
+        {
+            ctx.LongestFileLength = lines;
+            ctx.LongestFile = filePath;
         }
 
         return lines;
@@ -144,8 +161,7 @@ internal class KlocCommand
 
     private static void WriteHead()
     {
-        Console.WriteLine("<? Kilo Lines Of Code.");
-        Console.WriteLine();
+        Console.WriteLine($"<? Compute Kilo Lines Of Code.");
     }
 
 
@@ -166,14 +182,12 @@ internal class KlocCommand
 
         foreach (var subDirectory in subDirectories)
         {
-            Console.Write($"{(Path.GetFileName(subDirectory) ?? "").PadRight(colWidth)} ");
-
             var sourceFileEnumerable = new ProjectDirectory(subDirectory);
-            var sourceFiles = sourceFileEnumerable.ToArray();
             var ctx = new CounterContext();
-            CountOfLines(sourceFiles, enabledExts, ctx);
-
-            Console.WriteLine($"{ctx.Lines,13:n0}  {PrintAnalysis(ctx)}");
+            CountOfLines(sourceFileEnumerable, enabledExts, ctx);
+            var msg = $"{(Path.GetFileName(subDirectory) ?? "").PadRight(colWidth)} {ctx.Lines,13:n0}  {PrintAnalysis(ctx)}";
+            msg = msg.PadRight(Console.WindowWidth - 1);
+            Console.WriteLine(msg);
             sum += ctx.Lines;
         }
 
