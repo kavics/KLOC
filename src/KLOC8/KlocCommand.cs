@@ -2,8 +2,10 @@
 
 namespace KLOC8;
 
-internal class KlocCommand
+internal class KlocCommand(IDisk disk)
 {
+    private IDisk _disk = disk;
+
     public void Execute(string path, bool isContainer, string? fileTypes)
     {
         string[]? enabledExts = fileTypes?.Split(',').Select(x=>x.Trim()).ToArray();
