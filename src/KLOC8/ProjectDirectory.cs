@@ -33,7 +33,6 @@ internal class ProjectDirectory : PathEnumerable
             }
             yield return path;
         }
-        //return new DirectoryEnumerable(_directoryPath).GetEnumerator();
     }
 
     public string[] GetDirectories()
@@ -72,12 +71,12 @@ internal class ProjectDirectory : PathEnumerable
         }
 
         private static readonly string[] DisabledDirectoryNames =
-        {
+        [
             ".git", ".vs", "bin", "obj", "docs", "references", "packages", "testresults", "netstandard",
             "node_modules", "runtimes" /* TaskExecutors/AsposePreviewGenerator */, 
             "app_data", "nuget", "install-services", "install-services-core",
             "bootstrap"
-        };
+        ];
         private static bool IsEnabledDirectory(string path)
         {
             var name = Path.GetFileName(path)?.ToLowerInvariant() ?? "";
@@ -86,10 +85,10 @@ internal class ProjectDirectory : PathEnumerable
         }
 
         private static readonly string[] DisabledExtensions =
-        {
+        [
             ".ico", ".jpg", ".png", ".gif", ".svg", ".zip", ".dll", ".exe", ".pdb", ".aab" /*Android Application Bundles*/,
             ".so" /* AsposePreviewGenerator */
-        };
+        ];
         private static bool IsEnabledFile(string path)
         {
             var ext = Path.GetExtension(path)?.ToLowerInvariant();
