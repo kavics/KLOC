@@ -1,4 +1,6 @@
-﻿namespace KLOC8;
+﻿using System.Collections.Generic;
+
+namespace KLOC8;
 
 internal class CounterContext
 {

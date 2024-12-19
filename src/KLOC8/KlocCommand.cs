@@ -1,4 +1,7 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace KLOC8;
 
@@ -17,11 +20,11 @@ internal class KlocCommand(IDisk disk)
         }
 
         WriteHead();
-        var result1 = $"PATH: {Path.GetFullPath(path)}";
+        var result1 = $"PATH: {_disk.Path_GetFullPath(path)}";
         Console.WriteLine(result1);
 
         var ctx = new CounterContext();
-        var sourceFileEnumerable = new ProjectDirectory(path);
+        var sourceFileEnumerable = new ProjectDirectory(path, _disk);
         var (fileCount, counts) = CountOfLines(sourceFileEnumerable, enabledExts, ctx);
         Console.Write(" ".PadRight(Console.WindowWidth - 1));
         Console.Write("\r");
@@ -39,8 +42,8 @@ internal class KlocCommand(IDisk disk)
         Console.WriteLine("Source files:   {0,15:n0}", fileCount);
         Console.WriteLine("Bytes length:   {0,15:n0}", ctx.Bytes);
         Console.WriteLine("Empty lines:    {0,15:n0}", ctx.EmptyLines);
-        Console.WriteLine("Longest file:   {0,15:n0} lines, {1}", ctx.LongestFileLength, Path.GetFullPath(ctx.LongestFile));
-        Console.WriteLine("Longest line:   {0,15:n0} characters, {1}, line:{2}", ctx.LongestLineLength, Path.GetFullPath(ctx.LongestLineFile), ctx.LongestLineLine);
+        Console.WriteLine("Longest file:   {0,15:n0} lines, {1}", ctx.LongestFileLength, _disk.Path_GetFullPath(ctx.LongestFile));
+        Console.WriteLine("Longest line:   {0,15:n0} characters, {1}, line:{2}", ctx.LongestLineLength, _disk.Path_GetFullPath(ctx.LongestLineFile), ctx.LongestLineLine);
 
         //Console.WriteLine();
         //Console.WriteLine("File types:");
@@ -100,7 +103,7 @@ internal class KlocCommand(IDisk disk)
                 if (parts.Length != 2)
                     continue;
 
-                var ext = Path.GetExtension(parts[0]);
+                var ext = _disk.Path_GetExtension(parts[0]);
                 if (int.TryParse(parts[1], out var count))
                 {
                     countsPerFileType.TryGetValue(ext, out var previousValue);
@@ -113,7 +116,7 @@ internal class KlocCommand(IDisk disk)
     }
     private int? CountOfLines(string sourceFile, string[]? enabledExts, CounterContext ctx)
     {
-        var ext = Path.GetExtension(sourceFile)?.ToLowerInvariant() ?? "";
+        var ext = _disk.Path_GetExtension(sourceFile)?.ToLowerInvariant() ?? "";
 
         if (enabledExts != null && !enabledExts.Contains(ext))
             return null;
@@ -170,10 +173,10 @@ internal class KlocCommand(IDisk disk)
 
     private void ProcessContainer(string path, string[]? enabledExts)
     {
-        var mainProjectDirectory = new ProjectDirectory(path);
+        var mainProjectDirectory = new ProjectDirectory(path, _disk);
         var subDirectories = mainProjectDirectory.GetDirectories();
 
-        var colWidth = subDirectories.Max(x => Path.GetFileName(x)?.Length ?? 0) + 2;
+        var colWidth = subDirectories.Max(x => _disk.Path_GetFileName(x)?.Length ?? 0) + 2;
         var line = $"{new string('-', colWidth)} -------------  ------------------------------------------------------";
         WriteHead();
         Console.WriteLine("CONTAINER: " + path);
@@ -184,10 +187,10 @@ internal class KlocCommand(IDisk disk)
 
         foreach (var subDirectory in subDirectories)
         {
-            var sourceFileEnumerable = new ProjectDirectory(subDirectory);
+            var sourceFileEnumerable = new ProjectDirectory(subDirectory, _disk);
             var ctx = new CounterContext();
             CountOfLines(sourceFileEnumerable, enabledExts, ctx);
-            var msg = $"{(Path.GetFileName(subDirectory) ?? "").PadRight(colWidth)} {ctx.Lines,13:n0}  {PrintAnalysis(ctx)}";
+            var msg = $"{(_disk.Path_GetFileName(subDirectory) ?? "").PadRight(colWidth)} {ctx.Lines,13:n0}  {PrintAnalysis(ctx)}";
             msg = msg.PadRight(Console.WindowWidth - 1);
             Console.WriteLine(msg);
             sum += ctx.Lines;
