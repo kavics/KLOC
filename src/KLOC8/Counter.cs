@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace KLOC8;
@@ -35,25 +36,6 @@ public class Counter(IDisk disk)
             }
         }
 
-        using (var reader = tempFile.GetReader())
-        {
-            string? line;
-            while ((line = reader.ReadLine()) != null)
-            {
-                // Path \t SLOC
-                var parts = line.Split('\t');
-                if (parts.Length != 2)
-                    continue;
-
-                var ext = disk.Path_GetExtension(parts[0]);
-                if (int.TryParse(parts[1], out var count))
-                {
-                    LinesPerFileTypes.TryGetValue(ext, out var previousValue);
-                    LinesPerFileTypes[ext] = previousValue + count;
-                }
-            }
-        }
-
         return Lines;
     }
     private int? CountOfLines(string sourceFile, string[]? enabledExts)
@@ -69,14 +51,15 @@ public class Counter(IDisk disk)
             FileTypes[ext]++;
 
         var fileDescriptor = disk.CreateFileDescriptor(sourceFile);
-        Bytes += fileDescriptor.Length;
 
         using (var stream = fileDescriptor.OpenRead())
             return CountOfLines(stream, sourceFile);
     }
-    private int? CountOfLines(System.IO.Stream stream, string filePath)
+    public int? CountOfLines(System.IO.Stream stream, string filePath)
     {
         var lines = 0;
+
+        Bytes += stream.Length;
 
         using var reader = new System.IO.StreamReader(stream);
 
@@ -85,7 +68,6 @@ public class Counter(IDisk disk)
         {
             lineIndex++;
             lines++;
-            Lines++;
             if (line.Trim().Length == 0)
                 EmptyLines++;
             if (line.Length > LongestLineLength)
@@ -102,6 +84,19 @@ public class Counter(IDisk disk)
             LongestFile = filePath;
         }
 
+        // Actualize per file counts
+        Lines += lines;
+
+        var ext = disk.Path_GetExtension(filePath)?.ToLowerInvariant() ?? "";
+        if (!FileTypes.ContainsKey(ext))
+            FileTypes[ext] = 1;
+        else
+            FileTypes[ext]++;
+
+        LinesPerFileTypes.TryGetValue(ext, out var previousValue);
+        LinesPerFileTypes[ext] = previousValue + lines;
+
+        //
         return lines;
     }
 
