@@ -13,4 +13,5 @@ internal class CounterContext
     public int LongestFileLength { get; set; }
     public string LongestFile { get; set; }
     public Dictionary<string, int> FileTypes { get; } = new Dictionary<string, int>();
+    public int FileCount { get; set; }
 }

@@ -6,14 +6,12 @@ namespace KLOC8;
 
 internal class ProjectDirectory(string directoryPath, IDisk disk) : PathEnumerable
 {
-    private readonly IDisk _disk = disk;
-
     public override IEnumerator<string> GetEnumerator()
     {
         var count = 0;
         var lastProgressAt = DateTime.Now;
         // Enumerate all files in depth
-        foreach (var path in new DirectoryEnumerable(directoryPath, _disk))
+        foreach (var path in new DirectoryEnumerable(directoryPath, disk))
         {
             count++;
             if ((DateTime.Now - lastProgressAt).TotalMilliseconds > 100)
@@ -36,23 +34,21 @@ internal class ProjectDirectory(string directoryPath, IDisk disk) : PathEnumerab
 
     public string[] GetDirectories()
     {
-        return new DirectoryEnumerable(directoryPath, _disk).GetEnabledDirectories();
+        return new DirectoryEnumerable(directoryPath, disk).GetEnabledDirectories();
     }
 
     private class DirectoryEnumerable(string path, IDisk disk) : PathEnumerable
     {
-        private readonly IDisk _disk = disk;
-
         public override IEnumerator<string> GetEnumerator()
         {
             foreach (var dir in GetEnabledDirectories())
             {
-                foreach (var file in new DirectoryEnumerable(dir, _disk))
+                foreach (var file in new DirectoryEnumerable(dir, disk))
                     yield return file;
             }
 
-            foreach (var file in _disk.Directory_GetFiles(path))
-                if (IsEnabledFile(file, _disk))
+            foreach (var file in disk.Directory_GetFiles(path))
+                if (IsEnabledFile(file, disk))
                     yield return file;
         }
 
@@ -61,7 +57,7 @@ internal class ProjectDirectory(string directoryPath, IDisk disk) : PathEnumerab
         /// </summary>
         public string[] GetEnabledDirectories()
         {
-            return _disk.Directory_GetDirectories(path)
+            return disk.Directory_GetDirectories(path)
                 .Where(p => IsEnabledDirectory(p, disk))
                 .ToArray();
         }
