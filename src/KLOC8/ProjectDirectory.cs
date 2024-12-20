@@ -52,7 +52,7 @@ internal class ProjectDirectory(string directoryPath, IDisk disk) : PathEnumerab
             }
 
             foreach (var file in _disk.Directory_GetFiles(path))
-                if (IsEnabledFile(file))
+                if (IsEnabledFile(file, _disk))
                     yield return file;
         }
 
@@ -62,7 +62,7 @@ internal class ProjectDirectory(string directoryPath, IDisk disk) : PathEnumerab
         public string[] GetEnabledDirectories()
         {
             return _disk.Directory_GetDirectories(path)
-                .Where(IsEnabledDirectory)
+                .Where(p => IsEnabledDirectory(p, disk))
                 .ToArray();
         }
 
@@ -73,9 +73,9 @@ internal class ProjectDirectory(string directoryPath, IDisk disk) : PathEnumerab
             "app_data", "nuget", "install-services", "install-services-core",
             "bootstrap"
         ];
-        private static bool IsEnabledDirectory(string path)
+        private static bool IsEnabledDirectory(string path, IDisk disk)
         {
-            var name = Path.GetFileName(path)?.ToLowerInvariant() ?? "";
+            var name = disk.Path_GetFileName(path).ToLowerInvariant();
             return !DisabledDirectoryNames.Contains(name);
 
         }
@@ -85,9 +85,9 @@ internal class ProjectDirectory(string directoryPath, IDisk disk) : PathEnumerab
             ".ico", ".jpg", ".png", ".gif", ".svg", ".zip", ".dll", ".exe", ".pdb", ".aab" /*Android Application Bundles*/,
             ".so" /* AsposePreviewGenerator */
         ];
-        private static bool IsEnabledFile(string path)
+        private static bool IsEnabledFile(string path, IDisk disk)
         {
-            var ext = Path.GetExtension(path)?.ToLowerInvariant();
+            var ext = disk.Path_GetExtension(path).ToLowerInvariant();
             return !DisabledExtensions.Contains(ext);
         }
     }

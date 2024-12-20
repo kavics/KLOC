@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace KLOC8;
 
 internal class KlocCommand(IDisk disk)
 {
-    private IDisk _disk = disk;
+    private readonly IDisk _disk = disk;
 
     public void Execute(string path, bool isContainer, string? fileTypes)
     {
@@ -76,11 +75,12 @@ internal class KlocCommand(IDisk disk)
 
     private (int fileCount, Dictionary<string, int> counts) CountOfLines(IEnumerable<string> sourceFiles, string[]? enabledExts, CounterContext ctx)
     {
-        var file = new FileInfo("KLOC-TEMP.txt");
-        file.Delete();
+        _disk.CreateFileDescriptor("KLOC-TEMP.txt")
+            .Delete();
 
         var fileCount = 0;
-        using (var writer = new StreamWriter("KLOC-TEMP.txt", false))
+        var tempFile = _disk.CreateFileDescriptor("KLOC-TEMP.txt");
+        using (var writer = tempFile.GetWriter())
         {
             writer.WriteLine($"Path\tSLOC");
             foreach (var sourceFile in sourceFiles)
@@ -93,7 +93,7 @@ internal class KlocCommand(IDisk disk)
         }
 
         var countsPerFileType = new Dictionary<string, int>();
-        using (var reader = new StreamReader("KLOC-TEMP.txt"))
+        using (var reader = tempFile.GetReader())
         {
             string line;
             while ((line = reader.ReadLine()) != null)
@@ -126,17 +126,22 @@ internal class KlocCommand(IDisk disk)
         else
             ctx.FileTypes[ext]++;
 
-        var fileInfo = new FileInfo(sourceFile);
-        ctx.Bytes += fileInfo.Length;
+//var fileInfo = new FileInfo(sourceFile);
+//ctx.Bytes += fileInfo.Length;
 
-        using (var stream = fileInfo.OpenRead())
+//using (var stream = fileInfo.OpenRead())
+//    return CountOfLines(stream, sourceFile, ctx);
+        var fileDescriptor = _disk.CreateFileDescriptor(sourceFile);
+        ctx.Bytes += fileDescriptor.Length;
+
+        using(var stream = fileDescriptor.OpenRead())
             return CountOfLines(stream, sourceFile, ctx);
     }
-    private int? CountOfLines(Stream stream, string filePath, CounterContext ctx)
+    private int? CountOfLines(System.IO.Stream stream, string filePath, CounterContext ctx)
     {
         var lines = 0;
 
-        using var reader = new StreamReader(stream);
+        using var reader = new System.IO.StreamReader(stream);
 
         string line;
         var lineIndex = 0;
