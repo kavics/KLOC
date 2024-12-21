@@ -4,14 +4,14 @@ using System.Linq;
 
 namespace KLOC8;
 
-internal class ProjectDirectory(string directoryPath, IDisk disk) : PathEnumerable
+internal class ProjectDirectory(string directoryPath, IFilter filter, IDisk disk) : PathEnumerable
 {
     public override IEnumerator<string> GetEnumerator()
     {
         var count = 0;
         var lastProgressAt = DateTime.Now;
         // Enumerate all files in depth
-        foreach (var path in new DirectoryEnumerable(directoryPath, disk))
+        foreach (var path in new DirectoryEnumerable(directoryPath, filter, disk))
         {
             count++;
             if ((DateTime.Now - lastProgressAt).TotalMilliseconds > 100)
@@ -34,21 +34,21 @@ internal class ProjectDirectory(string directoryPath, IDisk disk) : PathEnumerab
 
     public string[] GetDirectories()
     {
-        return new DirectoryEnumerable(directoryPath, disk).GetEnabledDirectories();
+        return new DirectoryEnumerable(directoryPath, filter, disk).GetEnabledDirectories();
     }
 
-    private class DirectoryEnumerable(string path, IDisk disk) : PathEnumerable
+    private class DirectoryEnumerable(string path, IFilter filter, IDisk disk) : PathEnumerable
     {
         public override IEnumerator<string> GetEnumerator()
         {
             foreach (var dir in GetEnabledDirectories())
             {
-                foreach (var file in new DirectoryEnumerable(dir, disk))
+                foreach (var file in new DirectoryEnumerable(dir, filter, disk))
                     yield return file;
             }
 
             foreach (var file in disk.Directory_GetFiles(path))
-                if (IsEnabledFile(file, disk))
+                if (filter.IsEnabledFile(file))
                     yield return file;
         }
 
@@ -58,33 +58,8 @@ internal class ProjectDirectory(string directoryPath, IDisk disk) : PathEnumerab
         public string[] GetEnabledDirectories()
         {
             return disk.Directory_GetDirectories(path)
-                .Where(p => IsEnabledDirectory(p, disk))
+                .Where(filter.IsEnabledDirectory)
                 .ToArray();
-        }
-
-        private static readonly string[] DisabledDirectoryNames =
-        [
-            ".git", ".vs", "bin", "obj", "docs", "references", "packages", "testresults", "netstandard",
-            "node_modules", "runtimes" /* TaskExecutors/AsposePreviewGenerator */, 
-            "app_data", "nuget", "install-services", "install-services-core",
-            "bootstrap"
-        ];
-        private static bool IsEnabledDirectory(string path, IDisk disk)
-        {
-            var name = disk.Path_GetFileName(path).ToLowerInvariant();
-            return !DisabledDirectoryNames.Contains(name);
-
-        }
-
-        private static readonly string[] DisabledExtensions =
-        [
-            ".ico", ".jpg", ".png", ".gif", ".svg", ".zip", ".dll", ".exe", ".pdb", ".aab" /*Android Application Bundles*/,
-            ".so" /* AsposePreviewGenerator */
-        ];
-        private static bool IsEnabledFile(string path, IDisk disk)
-        {
-            var ext = disk.Path_GetExtension(path).ToLowerInvariant();
-            return !DisabledExtensions.Contains(ext);
         }
     }
 }
