@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace KLOC8;
 
-internal class KlocCommand(IDisk disk)
+internal class KlocCommand(IFilter filter, IDisk disk)
 {
     public void Execute(string path, bool isContainer, string? fileTypes)
     {
@@ -22,7 +22,7 @@ internal class KlocCommand(IDisk disk)
         Console.WriteLine($"PATH: {disk.Path_GetFullPath(path)}");
 
         var ctx = new Counter(disk);
-        var sourceFileEnumerable = new ProjectDirectory(path, disk);
+        var sourceFileEnumerable = new ProjectDirectory(path, filter, disk);
         var sloc = ctx.CountOfLines(sourceFileEnumerable, enabledExts);
         Console.Write(" ".PadRight(Console.WindowWidth - 1));
         Console.Write("\r");
@@ -68,7 +68,7 @@ internal class KlocCommand(IDisk disk)
 
     private void ProcessContainer(string path, string[]? enabledExts)
     {
-        var mainProjectDirectory = new ProjectDirectory(path, disk);
+        var mainProjectDirectory = new ProjectDirectory(path, filter, disk);
         var subDirectories = mainProjectDirectory.GetDirectories();
 
         var colWidth = subDirectories.Max(x => disk.Path_GetFileName(x)?.Length ?? 0) + 2;
@@ -76,13 +76,13 @@ internal class KlocCommand(IDisk disk)
         WriteHead();
         Console.WriteLine("CONTAINER: " + path);
         Console.WriteLine();
-        Console.WriteLine($"{"NAME".PadRight(colWidth)} Lines Of Code  Count of source top file types");
+        Console.WriteLine($"{"NAME".PadRight(colWidth)} Lines Of Code  Top file types");
         Console.WriteLine(line);
         var sum = 0;
 
         foreach (var subDirectory in subDirectories)
         {
-            var sourceFileEnumerable = new ProjectDirectory(subDirectory, disk);
+            var sourceFileEnumerable = new ProjectDirectory(subDirectory, filter, disk);
             var ctx = new Counter(disk);
             ctx.CountOfLines(sourceFileEnumerable, enabledExts);
             var msg = $"{(disk.Path_GetFileName(subDirectory) ?? "").PadRight(colWidth)} {ctx.Lines,13:n0}  {PrintAnalysis(ctx)}";

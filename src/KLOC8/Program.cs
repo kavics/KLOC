@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 var services = new ServiceCollection()
     .AddSingleton<IDisk, Disk>()
     .AddScoped<KlocCommand>()
+    .AddScoped<IFilter, CommonListFilter>()
     .BuildServiceProvider();
 
 var rootCommand = new RootCommand();
