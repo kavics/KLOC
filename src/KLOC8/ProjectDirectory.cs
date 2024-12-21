@@ -1,20 +1,17 @@
-﻿namespace KLOC8;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
-internal class ProjectDirectory : PathEnumerable
+namespace KLOC8;
+
+internal class ProjectDirectory(string directoryPath, IDisk disk) : PathEnumerable
 {
-    private readonly string _directoryPath;
-
-    public ProjectDirectory(string directoryPath)
-    {
-        _directoryPath = directoryPath;
-    }
-
     public override IEnumerator<string> GetEnumerator()
     {
         var count = 0;
         var lastProgressAt = DateTime.Now;
         // Enumerate all files in depth
-        foreach (var path in new DirectoryEnumerable(_directoryPath))
+        foreach (var path in new DirectoryEnumerable(directoryPath, disk))
         {
             count++;
             if ((DateTime.Now - lastProgressAt).TotalMilliseconds > 100)
@@ -37,36 +34,31 @@ internal class ProjectDirectory : PathEnumerable
 
     public string[] GetDirectories()
     {
-        return DirectoryEnumerable.GetEnabledDirectories(_directoryPath);
+        return new DirectoryEnumerable(directoryPath, disk).GetEnabledDirectories();
     }
 
-    private class DirectoryEnumerable : PathEnumerable
+    private class DirectoryEnumerable(string path, IDisk disk) : PathEnumerable
     {
-        private readonly string _path;
-        public DirectoryEnumerable(string path)
-        {
-            _path = path;
-        }
         public override IEnumerator<string> GetEnumerator()
         {
-            foreach (var dir in GetEnabledDirectories(_path))
+            foreach (var dir in GetEnabledDirectories())
             {
-                foreach (var file in new DirectoryEnumerable(dir))
+                foreach (var file in new DirectoryEnumerable(dir, disk))
                     yield return file;
             }
 
-            foreach (var file in Directory.GetFiles(_path))
-                if (IsEnabledFile(file))
+            foreach (var file in disk.Directory_GetFiles(path))
+                if (IsEnabledFile(file, disk))
                     yield return file;
         }
 
         /// <summary>
         /// Returns all enabled child directories.
         /// </summary>
-        public static string[] GetEnabledDirectories(string path)
+        public string[] GetEnabledDirectories()
         {
-            return Directory.GetDirectories(path)
-                .Where(IsEnabledDirectory)
+            return disk.Directory_GetDirectories(path)
+                .Where(p => IsEnabledDirectory(p, disk))
                 .ToArray();
         }
 
@@ -77,9 +69,9 @@ internal class ProjectDirectory : PathEnumerable
             "app_data", "nuget", "install-services", "install-services-core",
             "bootstrap"
         ];
-        private static bool IsEnabledDirectory(string path)
+        private static bool IsEnabledDirectory(string path, IDisk disk)
         {
-            var name = Path.GetFileName(path)?.ToLowerInvariant() ?? "";
+            var name = disk.Path_GetFileName(path).ToLowerInvariant();
             return !DisabledDirectoryNames.Contains(name);
 
         }
@@ -89,9 +81,9 @@ internal class ProjectDirectory : PathEnumerable
             ".ico", ".jpg", ".png", ".gif", ".svg", ".zip", ".dll", ".exe", ".pdb", ".aab" /*Android Application Bundles*/,
             ".so" /* AsposePreviewGenerator */
         ];
-        private static bool IsEnabledFile(string path)
+        private static bool IsEnabledFile(string path, IDisk disk)
         {
-            var ext = Path.GetExtension(path)?.ToLowerInvariant();
+            var ext = disk.Path_GetExtension(path).ToLowerInvariant();
             return !DisabledExtensions.Contains(ext);
         }
     }

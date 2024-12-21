@@ -1,5 +1,11 @@
 ﻿using System.CommandLine;
 using KLOC8;
+using Microsoft.Extensions.DependencyInjection;
+
+var services = new ServiceCollection()
+    .AddSingleton<IDisk, Disk>()
+    .AddScoped<KlocCommand>()
+    .BuildServiceProvider();
 
 var rootCommand = new RootCommand();
 
@@ -16,7 +22,7 @@ rootCommand.Add(fileTypesOption);
 
 rootCommand.SetHandler((path, isContainer, fileTypes) =>
 {
-    var command = new KlocCommand();
+    var command = services.GetRequiredService<KlocCommand>();
     command.Execute(path, isContainer, fileTypes);
 }, pathArgument, isContainerOption, fileTypesOption);
 
