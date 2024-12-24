@@ -28,6 +28,8 @@ public abstract class FileDescriptor(string path)
 
     public abstract StreamReader GetReader();
     public abstract StreamWriter GetWriter();
+
+    public abstract bool Exists();
 }
 
 internal class FileSystemFileDescriptor(string path) : FileDescriptor(path)
@@ -38,6 +40,7 @@ internal class FileSystemFileDescriptor(string path) : FileDescriptor(path)
     public override Stream OpenRead() => _fileInfo.OpenRead();
     public override StreamReader GetReader() => new(Path);
     public override StreamWriter GetWriter() => new(Path, false);
+    public override bool Exists() => _fileInfo.Exists;
 }
 
 public class Disk : IDisk
