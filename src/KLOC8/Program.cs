@@ -4,8 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 var services = new ServiceCollection()
     .AddSingleton<IDisk, Disk>()
-    .AddScoped<KlocCommand>()
-    .AddScoped<IFilter, KlocIgnoreFileFilter>()
+    .AddSingleton<KlocCommand>()
+    .AddSingleton<IFilter, KlocIgnoreFileFilter>()
     .BuildServiceProvider();
 
 var rootCommand = new RootCommand();

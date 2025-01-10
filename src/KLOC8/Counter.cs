@@ -88,10 +88,6 @@ public class Counter(IDisk disk)
         Lines += lines;
 
         var ext = disk.Path_GetExtension(filePath)?.ToLowerInvariant() ?? "";
-        if (!FileTypes.ContainsKey(ext))
-            FileTypes[ext] = 1;
-        else
-            FileTypes[ext]++;
 
         LinesPerFileTypes.TryGetValue(ext, out var previousValue);
         LinesPerFileTypes[ext] = previousValue + lines;
