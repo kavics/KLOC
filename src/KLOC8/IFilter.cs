@@ -11,6 +11,12 @@ public interface IFilter
     bool IsEnabledFile(string path);
 }
 
+public class DefaultFilter : IFilter
+{
+    public bool IsEnabledDirectory(string path) => true;
+    public bool IsEnabledFile(string path) => true;
+}
+
 public class CommonListFilter(IDisk disk) : IFilter
 {
     private static readonly string[] DisabledDirectoryNames =
@@ -85,5 +91,36 @@ public class KlocIgnoreFileFilter(IDisk disk) : IFilter
             .FirstOrDefault();
 
         return filterRecord != default ? filterRecord.filter : OneLevelFilter.Empty;
+    }
+}
+
+public class GlobalKlocIgnoreFileFilter(IDisk disk) : IFilter
+{
+    private OneLevelFilter _theFilter = new();
+
+    /// <summary>
+    /// Path to the global ignore file. Need to be called by the FilterFactory.
+    /// </summary>
+    public void SetFilterPath(string path)
+    {
+        var ignoreFile = disk.CreateFileDescriptor(path);
+        if (!ignoreFile.Exists())
+            throw new InvalidOperationException($"Global ignore file not found: {path}");
+        var fileContent = ignoreFile.GetReader().ReadToEnd();
+        _theFilter = new KlocIgnoreFileParser().Parse(fileContent, path);
+    }
+
+    public bool IsEnabledDirectory(string path)
+    {
+        var directoryName = Path.GetFileName(path);
+        var enabled = !_theFilter.IgnoredDirectories.Contains(directoryName, StringComparer.InvariantCultureIgnoreCase);
+        return enabled;
+    }
+
+    public bool IsEnabledFile(string path)
+    {
+        var extension = Path.GetExtension(path);
+        var enabled = !_theFilter.IgnoredFiles.Contains(extension, StringComparer.InvariantCultureIgnoreCase);
+        return enabled;
     }
 }

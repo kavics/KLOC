@@ -1,15 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.IO;
 using System.Linq;
 
 namespace KLOC8;
 
-internal class KlocCommand(IFilter filter, IDisk disk)
+internal class KlocCommand(IFilterFactory filterFactory, IDisk disk)
 {
-    public void Execute(string path, bool isContainer, string? fileTypes)
+    private IFilter _filter = new DefaultFilter();
+
+    public void Execute(string path, bool isContainer, string? fileTypes, string? globalKlocIgnorePath)
     {
+        _filter = filterFactory.CreateFilter(globalKlocIgnorePath);
+
         string[]? enabledExts = fileTypes?.Split(',').Select(x=>x.Trim()).ToArray();
 
         if (isContainer)
@@ -22,8 +23,8 @@ internal class KlocCommand(IFilter filter, IDisk disk)
         Console.WriteLine($"PATH: {disk.Path_GetFullPath(path)}");
 
         var ctx = new Counter(disk);
-        var sourceFileEnumerable = new ProjectDirectory(path, filter, disk);
-        var sloc = ctx.CountOfLines(sourceFileEnumerable, enabledExts);
+        var sourceFileEnumerable = new ProjectDirectory(path, _filter, disk);
+        var _ = ctx.CountOfLines(sourceFileEnumerable, enabledExts);
         Console.Write(" ".PadRight(Console.WindowWidth - 1));
         Console.Write("\r");
 
@@ -68,10 +69,10 @@ internal class KlocCommand(IFilter filter, IDisk disk)
 
     private void ProcessContainer(string path, string[]? enabledExts)
     {
-        var mainProjectDirectory = new ProjectDirectory(path, filter, disk);
+        var mainProjectDirectory = new ProjectDirectory(path, _filter, disk);
         var subDirectories = mainProjectDirectory.GetDirectories();
 
-        var colWidth = subDirectories.Max(x => disk.Path_GetFileName(x)?.Length ?? 0) + 2;
+        var colWidth = subDirectories.Max(x => disk.Path_GetFileName(x).Length) + 2;
         var line = $"{new string('-', colWidth)} -------------  ------------------------------------------------------";
         WriteHead();
         Console.WriteLine("CONTAINER: " + path);
@@ -82,10 +83,10 @@ internal class KlocCommand(IFilter filter, IDisk disk)
 
         foreach (var subDirectory in subDirectories)
         {
-            var sourceFileEnumerable = new ProjectDirectory(subDirectory, filter, disk);
+            var sourceFileEnumerable = new ProjectDirectory(subDirectory, _filter, disk);
             var ctx = new Counter(disk);
             ctx.CountOfLines(sourceFileEnumerable, enabledExts);
-            var msg = $"{(disk.Path_GetFileName(subDirectory) ?? "").PadRight(colWidth)} {ctx.Lines,13:n0}  {PrintAnalysis(ctx)}";
+            var msg = $"{disk.Path_GetFileName(subDirectory).PadRight(colWidth)} {ctx.Lines,13:n0}  {PrintAnalysis(ctx)}";
             msg = msg.PadRight(Console.WindowWidth - 1);
             Console.WriteLine(msg);
             sum += ctx.Lines;
